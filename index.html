@@ -424,11 +424,22 @@ async function connectBLE() {
   if (!navigator.bluetooth) return toast("Trình duyệt này không hỗ trợ Web Bluetooth");
   let dev;
   try {
-    dev = await navigator.bluetooth.requestDevice({
-      filters: [{ namePrefix: "CAN_" }, { namePrefix: "CEV_" }, { namePrefix: "ODM_" }, { namePrefix: "CAN-" }, { namePrefix: "@" }, { services: [SVC] }],
-      optionalServices: [SVC],
-    });
-  } catch (e) { if (e.name !== "NotFoundError") toast("Không chọn được thiết bị: " + e.message); return; }
+    try {
+      dev = await navigator.bluetooth.requestDevice({
+        filters: [{ namePrefix: "CAN_" }, { namePrefix: "CEV_" }, { namePrefix: "ODM_" }, { namePrefix: "CAN-" }, { namePrefix: "@" }, { services: [SVC] }],
+        optionalServices: [SVC],
+      });
+    } catch (e) {
+      if (isCancel(e)) throw e;
+      // Một số trình duyệt (Bluefy, WebBLE…) không hỗ trợ lọc theo tên → hiện tất cả thiết bị
+      log("sys", "Lọc theo tên thất bại (" + errText(e) + "), thử hiện tất cả thiết bị");
+      dev = await navigator.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: [SVC] });
+    }
+  } catch (e) {
+    log("sys", "Không chọn được thiết bị: " + errText(e));
+    if (!isCancel(e)) toast("Không chọn được thiết bị: " + errText(e));
+    return;
+  }
   const name = dev.name || "";
   setPill("Đang kết nối " + name + "…");
   try {
@@ -446,10 +457,12 @@ async function connectBLE() {
     };
     startSession(name);
   } catch (e) {
-    setPill("Chưa kết nối"); toast("Kết nối thất bại: " + e.message); log("sys", "Kết nối thất bại: " + e.message);
+    setPill("Chưa kết nối"); toast("Kết nối thất bại: " + errText(e)); log("sys", "Kết nối thất bại: " + errText(e));
   }
 }
 const sleep = ms => new Promise(r => setTimeout(r, ms));
+const errText = e => (e && (e.message || e.name)) || (typeof e == "string" ? e : JSON.stringify(e)) || "lỗi không rõ";
+const isCancel = e => (e && e.name) === "NotFoundError" || /cancel|hủy/i.test(errText(e));
 
 function startSession(name) {
   Object.assign(D, { ver: 0, type: 0, infoOK: 0, h: -1, ACK: 1, CCK: 1 });
