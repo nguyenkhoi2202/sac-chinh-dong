@@ -133,7 +133,7 @@ nav.tabs button.act{color:var(--text);background:#141c38;border-color:var(--line
 .dlg{width:100%;max-width:420px;background:#0d1328;border:1px solid var(--line);border-radius:20px;padding:20px;animation:up .2s}
 @keyframes up{from{transform:translateY(20px);opacity:0}}
 .dlg h4{margin:0 0 6px;font-size:18px}
-.dlg p{margin:0 0 14px;color:var(--mut);font-size:14px;line-height:1.5}
+.dlg p{white-space:pre-line;margin:0 0 14px;color:var(--mut);font-size:14px;line-height:1.5}
 .dlg .acts{display:flex;gap:10px;margin-top:16px}.dlg .acts .btn{flex:1}
 #toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(30px);opacity:0;background:#18213f;border:1px solid var(--line);padding:11px 18px;border-radius:12px;font-size:14px;z-index:60;transition:.25s;pointer-events:none;max-width:90vw;text-align:center}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -438,6 +438,7 @@ async function connectBLE() {
   } catch (e) {
     log("sys", "Không chọn được thiết bị: " + errText(e));
     if (!isCancel(e)) toast("Không chọn được thiết bị: " + errText(e));
+    else notFoundHelp();
     return;
   }
   const name = dev.name || "";
@@ -462,6 +463,21 @@ async function connectBLE() {
 }
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const errText = e => (e && (e.message || e.name)) || (typeof e == "string" ? e : JSON.stringify(e)) || "lỗi không rõ";
+async function notFoundHelp() {
+  let avail = true;
+  try { if (navigator.bluetooth.getAvailability) avail = await navigator.bluetooth.getAvailability(); } catch {}
+  dialog({
+    title: "Không tìm thấy thiết bị", input: false, noCancel: true,
+    msg: (avail ? "" : "⚠️ Trình duyệt báo Bluetooth đang TẮT hoặc không có quyền.\n\n") +
+      "Hãy kiểm tra:\n" +
+      "1. Bộ sạc đã cấp điện, bo Bluetooth đang chạy.\n" +
+      "2. Thoát hẳn app CAN-Control / WeChat trên các điện thoại khác — bo mạch chỉ nhận 1 kết nối, đang kết nối với máy khác thì sẽ không hiện.\n" +
+      "3. Android: bật Bluetooth VÀ Vị trí (GPS); cho Chrome quyền 'Thiết bị lân cận' và 'Vị trí'.\n" +
+      "4. Máy tính: bật Bluetooth; macOS cấp quyền Bluetooth cho Chrome (Cài đặt hệ thống → Quyền riêng tư → Bluetooth).\n" +
+      "5. Đứng gần bộ sạc, đợi 5–10 giây trong hộp chọn để danh sách hiện ra.\n" +
+      "6. Dùng Chrome/Edge (iPhone dùng Bluefy) và mở bằng link https://, không mở thẳng file.",
+  });
+}
 const isCancel = e => (e && e.name) === "NotFoundError" || /cancel|hủy/i.test(errText(e));
 
 function startSession(name) {
