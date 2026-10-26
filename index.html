@@ -1,0 +1,1017 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#04060f">
+<title>CAN-Control Web</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#04060f; --bg2:#080c1c; --card:#0d1328cc; --line:#1d2747; --text:#e6ecff; --mut:#8792b8;
+  --green:#3dff8f; --cyan:#22d3ff; --orange:#ff9a3c; --pink:#ff3fa4; --red:#ff4d5e; --yellow:#ffd23f;
+  --r:16px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:"Be Vietnam Pro",system-ui,sans-serif}
+body{min-height:100vh;background:
+  radial-gradient(900px 500px at 10% -10%,#1a2a6c55,transparent 60%),
+  radial-gradient(700px 500px at 110% 10%,#6c1a5a44,transparent 60%),var(--bg)}
+.mono{font-family:"JetBrains Mono",ui-monospace,monospace}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+.wrap{max-width:1100px;margin:0 auto;padding:0 16px 96px}
+
+/* header */
+header{position:sticky;top:0;z-index:20;backdrop-filter:blur(14px);background:#04060fcc;border-bottom:1px solid var(--line)}
+header .in{max-width:1100px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:12px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.3px}
+.logo i{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:linear-gradient(135deg,var(--cyan),var(--pink));font-style:normal;color:#000;font-size:16px}
+.logo small{display:block;font-weight:500;color:var(--mut);font-size:11px}
+.sp{flex:1}
+.pill{display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:99px;border:1px solid var(--line);font-size:13px;color:var(--mut)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--mut)}
+.on .dot{background:var(--green);box-shadow:0 0 10px var(--green)}
+.btn{padding:10px 16px;border-radius:12px;background:#18213f;border:1px solid var(--line);font-weight:600;font-size:14px;transition:.15s}
+.btn:hover{border-color:#3a4a80}
+.btn.pri{background:linear-gradient(135deg,var(--cyan),#3d7bff);color:#001;border:0}
+.btn.dan{background:#3a0d18;border-color:#6b1a2c;color:#ffb3bd}
+.btn.sm{padding:7px 12px;font-size:13px;border-radius:10px}
+
+/* tabs */
+nav.tabs{display:flex;gap:6px;overflow-x:auto;padding:14px 0 6px;scrollbar-width:none}
+nav.tabs button{white-space:nowrap;padding:9px 16px;border-radius:99px;color:var(--mut);font-weight:600;font-size:14px;border:1px solid transparent}
+nav.tabs button.act{color:var(--text);background:#141c38;border-color:var(--line)}
+
+/* connect screen */
+.hero{padding:56px 0 24px;text-align:center}
+.hero h1{font-size:clamp(30px,6vw,52px);margin:0 0 10px;line-height:1.1;font-weight:800}
+.hero h1 span{background:linear-gradient(90deg,var(--cyan),var(--green),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{color:var(--mut);max-width:620px;margin:0 auto 28px;line-height:1.6}
+.hero .acts{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.warn{margin:22px auto 0;max-width:640px;padding:12px 16px;border-radius:12px;background:#2a1d05;border:1px solid #5b3f0a;color:#ffd99a;font-size:14px;line-height:1.5;text-align:left}
+.feat{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:36px}
+
+/* cards */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.card h3{margin:0 0 12px;font-size:13px;letter-spacing:.8px;text-transform:uppercase;color:var(--mut);font-weight:700;display:flex;align-items:center;gap:8px}
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:820px){.g4{grid-template-columns:repeat(2,minmax(0,1fr))}.dash{grid-template-columns:1fr!important}}
+@media(max-width:620px){.g2{grid-template-columns:1fr}.logo small{display:none}.pill{max-width:42vw}.pill span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.logo>div{white-space:nowrap}header .in{gap:8px}.pill{padding:6px 10px}}
+
+/* dashboard */
+.status{margin-top:8px;padding:14px 18px;border-radius:var(--r);display:flex;align-items:center;gap:12px;font-weight:700;font-size:clamp(17px,3.4vw,22px);
+  background:linear-gradient(90deg,#0f2a1d,#0d1328);border:1px solid #1d4a33}
+.status.bad{background:linear-gradient(90deg,#3a0d18,#0d1328);border-color:#6b1a2c}
+.status .ic{width:12px;height:12px;border-radius:50%;background:var(--green);box-shadow:0 0 14px var(--green);flex:none}
+.status.bad .ic{background:var(--red);box-shadow:0 0 14px var(--red)}
+.status .tm{margin-left:auto;font-size:14px;color:var(--mut);font-weight:500}
+.dash{display:grid;grid-template-columns:1.15fr 1fr;gap:12px;margin-top:12px}
+.gauge{position:relative;display:grid;place-items:center;padding:8px 0}
+.gauge svg{width:min(300px,78vw);height:auto}
+.gauge .mid{position:absolute;text-align:center}
+.gauge .w{font-size:clamp(34px,8vw,46px);font-weight:700;line-height:1}
+.gauge .wl{color:var(--mut);font-size:12px;letter-spacing:1px;margin-top:4px}
+.big{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px}
+.big .v{font-size:clamp(28px,6.5vw,40px);font-weight:700;line-height:1.1}
+.big .l{color:var(--mut);font-size:12px}
+.big .s{font-size:13px;color:var(--mut);margin-top:4px}
+.big .s b{color:var(--text)}
+.tap{cursor:pointer;border-radius:12px;padding:10px;margin:-10px;transition:.15s}
+.tap:hover{background:#ffffff08}
+.kv{display:flex;justify-content:space-between;align-items:baseline;padding:8px 0;border-bottom:1px dashed #1d2747;font-size:14px}
+.kv:last-child{border:0}
+.kv span{color:var(--mut)}
+.kv b{font-family:"JetBrains Mono",monospace;font-weight:700}
+.soc{height:16px;border-radius:99px;background:#141c38;overflow:hidden;margin-top:6px}
+.soc i{display:block;height:100%;background:linear-gradient(90deg,var(--red),var(--yellow),var(--green));transition:width .6s}
+.presets{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.preset{padding:10px 6px;border-radius:12px;background:#111935;border:1px solid var(--line);text-align:center;font-family:"JetBrains Mono",monospace;font-size:13px;line-height:1.5}
+.preset.act{border-color:var(--green);box-shadow:0 0 0 1px var(--green) inset,0 0 18px #3dff8f33;color:var(--green)}
+.power{width:100%;padding:14px;border-radius:14px;font-weight:800;font-size:16px;letter-spacing:.5px;display:flex;align-items:center;justify-content:center;gap:10px}
+.power.on{background:linear-gradient(135deg,#0a3d24,#0d5b35);border:1px solid #1d8a52;color:var(--green)}
+.power.off{background:linear-gradient(135deg,#3a0d18,#5b1426);border:1px solid #8a1d36;color:#ffb3bd}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:8px 12px;border-radius:99px;background:#111935;border:1px solid var(--line);font-size:13px;display:flex;gap:6px;align-items:center}
+.chip b{font-family:"JetBrains Mono",monospace}
+.chip.on{border-color:#1d8a52;color:var(--green)}
+.alarms{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+@media(max-width:620px){.alarms{grid-template-columns:repeat(4,1fr)}}
+.al{padding:8px 4px;border-radius:10px;text-align:center;font-size:11.5px;line-height:1.3;background:#0b1024;border:1px solid #161e3b;color:#4b557a}
+.al.on{background:#3a0d18;border-color:#ff4d5e;color:#ffd0d5;box-shadow:0 0 12px #ff4d5e44}
+
+/* settings */
+.sec{margin-top:14px}
+.row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #161e3b}
+.row:last-child{border:0}
+.row .t{flex:1;min-width:0}
+.row .t div{font-weight:600;font-size:15px}
+.row .t small{display:block;color:var(--mut);font-size:12.5px;line-height:1.45;margin-top:2px}
+.val{font-family:"JetBrains Mono",monospace;font-weight:700;color:var(--green);padding:7px 12px;border-radius:10px;background:#0c2418;border:1px solid #1d4a33;white-space:nowrap;font-size:14px}
+.val.c{color:var(--cyan);background:#06202c;border-color:#11475c}
+.tog{width:52px;height:30px;border-radius:99px;background:#222b4d;position:relative;flex:none;transition:.2s}
+.tog::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#8792b8;transition:.2s}
+.tog.on{background:#1d8a52}.tog.on::after{left:25px;background:#fff}
+.seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;flex:none}
+.seg button{padding:7px 11px;font-size:13px;color:var(--mut)}
+.seg button.act{background:#1d8a52;color:#fff}
+.stepper{display:flex;gap:6px;align-items:center}
+
+/* log */
+#log{height:52vh;overflow:auto;font-family:"JetBrains Mono",monospace;font-size:12.5px;line-height:1.6;background:#03050c;border:1px solid var(--line);border-radius:12px;padding:10px;white-space:pre-wrap;word-break:break-all}
+#log .tx{color:var(--cyan)}#log .rx{color:var(--green)}#log .sys{color:var(--orange)}
+.inp{width:100%;padding:12px 14px;border-radius:12px;background:#0b1024;border:1px solid var(--line);color:var(--text);font:inherit;font-size:16px;outline:none}
+.inp:focus{border-color:var(--cyan)}
+
+/* modal & toast */
+.mask{position:fixed;inset:0;background:#000a;backdrop-filter:blur(4px);display:none;align-items:flex-end;justify-content:center;z-index:50;padding:16px}
+.mask.show{display:flex}
+@media(min-width:640px){.mask{align-items:center}}
+.dlg{width:100%;max-width:420px;background:#0d1328;border:1px solid var(--line);border-radius:20px;padding:20px;animation:up .2s}
+@keyframes up{from{transform:translateY(20px);opacity:0}}
+.dlg h4{margin:0 0 6px;font-size:18px}
+.dlg p{margin:0 0 14px;color:var(--mut);font-size:14px;line-height:1.5}
+.dlg .acts{display:flex;gap:10px;margin-top:16px}.dlg .acts .btn{flex:1}
+#toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(30px);opacity:0;background:#18213f;border:1px solid var(--line);padding:11px 18px;border-radius:12px;font-size:14px;z-index:60;transition:.25s;pointer-events:none;max-width:90vw;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+details.faq{border-bottom:1px solid #161e3b;padding:12px 0}
+details.faq summary{cursor:pointer;font-weight:600;list-style:none}
+details.faq summary::before{content:"＋ ";color:var(--cyan)}
+details.faq[open] summary::before{content:"－ "}
+details.faq p{color:var(--mut);font-size:14px;line-height:1.65;margin:8px 0 0}
+.hide{display:none!important}
+.mut{color:var(--mut)}
+</style>
+</head>
+<body>
+<header><div class="in">
+  <div class="logo"><i>⚡</i><div>CAN-Control<small>Bản web · Tiếng Việt</small></div></div>
+  <div class="sp"></div>
+  <div class="pill" id="pill"><span class="dot"></span><span id="pillTxt">Chưa kết nối</span></div>
+  <button class="btn sm hide" id="btnDisc">Ngắt</button>
+</div></header>
+
+<div class="wrap">
+  <!-- ============ MÀN HÌNH KẾT NỐI ============ -->
+  <section id="scrConnect">
+    <div class="hero">
+      <h1>Điều khiển bộ sạc <span>qua Bluetooth</span><br>ngay trên trình duyệt</h1>
+      <p>Kết nối bo mạch CAN Bluetooth (tên bắt đầu bằng <b class="mono">CAN_</b>, <b class="mono">CEV_</b>, <b class="mono">ODM_</b>) để xem điện áp, dòng, công suất theo thời gian thực và chỉnh mọi thông số — không cần cài app.</p>
+      <div class="acts">
+        <button class="btn pri" id="btnScan">🔍 Tìm &amp; kết nối thiết bị</button>
+        <button class="btn" id="btnDemo">🧪 Thiết bị ảo (bộ sạc)</button>
+        <button class="btn" id="btnDemoCEV">🚗 Thiết bị ảo (lấy điện trụ sạc)</button>
+      </div>
+      <div class="warn hide" id="bleWarn"></div>
+    </div>
+    <div class="feat">
+      <div class="card"><h3>📈 Giám sát</h3><div class="mut" style="font-size:14px;line-height:1.6">Điện áp / dòng / công suất / nhiệt độ vào–ra, hiệu suất, Ah, Wh, % pin, thời gian sạc, mã lỗi.</div></div>
+      <div class="card"><h3>🎛️ Điều khiển</h3><div class="mut" style="font-size:14px;line-height:1.6">Bật/tắt, đặt điện áp & dòng, 4 cấu hình nhanh, sạc 2 giai đoạn, hẹn giờ, giới hạn công suất.</div></div>
+      <div class="card"><h3>🛡️ Bảo vệ & hiệu chỉnh</h3><div class="mut" style="font-size:14px;line-height:1.6">Quá nhiệt, quạt, giới hạn V/A, hiệu chỉnh điện áp/dòng, giao thức nguồn (Huawei, ZTE, Infy…).</div></div>
+    </div>
+    <div class="card sec">
+      <h3>❓ Câu hỏi thường gặp</h3>
+      <details class="faq"><summary>Trình duyệt nào dùng được?</summary><p>Cần trình duyệt hỗ trợ Web Bluetooth: Chrome / Edge / Opera trên Android, Windows, macOS, ChromeOS. iPhone/iPad: Safari không hỗ trợ — hãy dùng app trình duyệt "Bluefy". Trang phải mở qua <b>https://</b> hoặc <b>localhost</b>.</p></details>
+      <details class="faq"><summary>Quên mật khẩu Bluetooth</summary><p>Mật khẩu mặc định là <b>0000</b>. Nếu đã đổi và quên, hãy chụp lại Device ID hiển thị trong hộp nhập mật khẩu và gửi cho đại lý/nhà cung cấp để được hỗ trợ.</p></details>
+      <details class="faq"><summary>Hiện "Lỗi giao tiếp CAN"</summary><p>Bo Bluetooth không đọc được dữ liệu CAN từ module nguồn. Nếu bị thường xuyên: kiểm tra dây tín hiệu, kiểm tra đã chọn đúng giao thức nguồn chưa (tab Hệ thống). Nếu thỉnh thoảng mới bị: thường do nhiễu điện từ — đi dây tránh xa biến áp, cắt bớt dây thừa, có thể nối thêm dây âm từ bo Bluetooth tới âm chip CAN của nguồn.</p></details>
+      <details class="faq"><summary>Hiện "Đầu ra bộ sạc bất thường"</summary><p>Bo mạch không đọc được điện áp ra qua CAN. Đo đầu ra bằng đồng hồ: nếu không có điện thì nguồn hỏng; nếu có thì kiểm tra lại giao thức nguồn đã chọn.</p></details>
+      <details class="faq"><summary>Đang dùng thì mất kết nối</summary><p>Khi chạy dòng lớn, nhiễu điện từ rất mạnh (đặc biệt vỏ nhôm CNC). Hãy đứng gần mặt trước bộ sạc, đi dây tín hiệu sát vỏ, tránh xa biến áp/cuộn cảm và cắt ngắn dây.</p></details>
+      <details class="faq"><summary>% pin khác với mạch bảo vệ (BMS)</summary><p>BMS tính % bằng bộ đếm coulomb; bộ sạc chỉ đọc được điện áp đầu ra nên % chỉ là ước lượng theo điện áp (ví dụ cell Li-ion 4.2V = 100%, 3.0V = 0%). Khi có dòng, điện trở dây làm số này lệch — chỉ để tham khảo.</p></details>
+      <details class="faq"><summary>Lấy điện từ trụ sạc thất bại (thiết bị CEV)</summary><p>Trụ sạc dùng các phiên bản GB/T 27930 khác nhau (2011/2015/2023); trụ càng mới càng tương thích. Nếu một trụ không được, thử trụ khác hoặc trạm của hãng khác.</p></details>
+      <details class="faq"><summary>Tốc độ quạt</summary><p>Quạt = tốc độ ban đầu + (dòng ra × hệ số dòng) + ((nhiệt độ − 30) × hệ số nhiệt), tối đa 255. Hãy dùng bo điều khiển quạt nguyên bản — bo này tự chạy tối đa khi có lỗi để tránh quá nhiệt.</p></details>
+    </div>
+  </section>
+
+  <!-- ============ MÀN HÌNH THIẾT BỊ ============ -->
+  <section id="scrDev" class="hide">
+    <nav class="tabs" id="tabs">
+      <button data-t="pDash" class="act">📊 Bảng điều khiển</button>
+      <button data-t="pSet">⚙️ Cài đặt</button>
+      <button data-t="pCal">🎯 Hiệu chỉnh</button>
+      <button data-t="pSys">🛠️ Hệ thống</button>
+      <button data-t="pLog">🧾 Nhật ký</button>
+    </nav>
+
+    <!-- Bảng điều khiển -->
+    <div id="pDash" class="page">
+      <div class="status" id="status"><span class="ic"></span><span id="stTxt">Đang kết nối…</span><span class="tm mono" id="stTm"></span></div>
+      <div class="dash">
+        <div class="card">
+          <div class="gauge">
+            <svg viewBox="0 0 200 200">
+              <defs><linearGradient id="gg" x1="0" x2="1"><stop offset="0" stop-color="#22d3ff"/><stop offset=".6" stop-color="#3dff8f"/><stop offset="1" stop-color="#ff3fa4"/></linearGradient></defs>
+              <circle cx="100" cy="100" r="84" fill="none" stroke="#141c38" stroke-width="12" stroke-dasharray="395.8 527.8" transform="rotate(135 100 100)" stroke-linecap="round"/>
+              <circle id="gArc" cx="100" cy="100" r="84" fill="none" stroke="url(#gg)" stroke-width="12" stroke-dasharray="0 527.8" transform="rotate(135 100 100)" stroke-linecap="round" style="transition:stroke-dasharray .6s"/>
+            </svg>
+            <div class="mid"><div class="w mono" id="vOW">0</div><div class="wl">W · CÔNG SUẤT RA</div><div class="wl mono" id="vPct" style="margin-top:6px"></div></div>
+          </div>
+          <div class="big">
+            <div class="tap" id="tapV"><div class="l">ĐIỆN ÁP RA</div><div class="v mono" style="color:var(--cyan)"><span id="vOV">0.00</span><small style="font-size:.5em"> V</small></div><div class="s">Đặt: <b class="mono" id="vSV">0.00</b> V ✎</div></div>
+            <div class="tap" id="tapA"><div class="l">DÒNG RA</div><div class="v mono" style="color:var(--orange)"><span id="vOA">0.00</span><small style="font-size:.5em"> A</small></div><div class="s">Đặt: <b class="mono" id="vSA">0.00</b> A ✎</div></div>
+          </div>
+          <div style="margin-top:16px"><div class="kv" style="border:0;padding:0"><span>Dung lượng pin (ước tính)</span><b id="vSOC">0%</b></div><div class="soc"><i id="socBar" style="width:0"></i></div></div>
+        </div>
+        <div class="grid">
+          <button class="power off" id="btnPower">⏻ <span id="pwrTxt">ĐANG TẮT — BẤM ĐỂ BẬT</span></button>
+          <div class="card">
+            <h3>⚡ Cấu hình nhanh <span class="mut" style="text-transform:none;letter-spacing:0;font-weight:500">(chạm để chuyển)</span></h3>
+            <div class="presets" id="presets"></div>
+          </div>
+          <div class="card">
+            <h3>🔧 Chức năng</h3>
+            <div class="chips" id="chips"></div>
+          </div>
+        </div>
+      </div>
+      <div class="grid g2 sec">
+        <div class="card"><h3>🔌 Đầu vào</h3>
+          <div class="kv"><span>Điện áp vào</span><b><span id="vIV">0</span> V</b></div>
+          <div class="kv"><span>Dòng vào</span><b><span id="vIA">0</span> A</b></div>
+          <div class="kv"><span>Công suất vào</span><b><span id="vIW">0</span> W</b></div>
+          <div class="kv"><span>Nhiệt độ vào</span><b><span id="vIT">0</span> ℃</b></div>
+          <div class="kv"><span>Hiệu suất</span><b><span id="vEEI">0</span> %</b></div>
+          <div class="kv"><span>Tổn hao</span><b><span id="vEES">0</span> W</b></div>
+        </div>
+        <div class="card"><h3>🔋 Đầu ra & thống kê</h3>
+          <div class="kv"><span>Nhiệt độ ra</span><b><span id="vOT">0</span> ℃</b></div>
+          <div class="kv"><span>Đã sạc (phiên này)</span><b><span id="vAh">0</span> Ah · <span id="vWh">0</span> Wh</b></div>
+          <div class="kv"><span>Thời gian sạc</span><b id="vTi">00:00:00</b></div>
+          <div class="kv"><span>Tích lũy</span><b><span id="vAH">0</span> Ah · <span id="vWH">0</span> Wh</b></div>
+          <div class="kv"><span>Tổng thời gian chạy</span><b id="vTI">00:00:00</b></div>
+          <div class="kv"><span>Quạt</span><b><span id="vNFS">0</span></b></div>
+        </div>
+      </div>
+      <div class="card sec" id="alarmCard"><h3>🚨 Trạng thái / cảnh báo module</h3><div class="alarms" id="alarms"></div></div>
+    </div>
+
+    <!-- Cài đặt / Hiệu chỉnh / Hệ thống được render từ bảng định nghĩa -->
+    <div id="pSet" class="page hide"></div>
+    <div id="pCal" class="page hide"></div>
+    <div id="pSys" class="page hide"></div>
+
+    <!-- Nhật ký -->
+    <div id="pLog" class="page hide">
+      <div class="card">
+        <h3>🧾 Dữ liệu Bluetooth</h3>
+        <div id="log"></div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <input class="inp mono" id="rawInp" placeholder="Gửi lệnh hex thô, vd: FF">
+          <button class="btn pri" id="rawSend">Gửi</button>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+          <label class="chip"><input type="checkbox" id="logLive"> Hiện cả gói dữ liệu live (FB)</label>
+          <button class="btn sm" id="logClr">Xóa nhật ký</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="mask" id="mask"><div class="dlg">
+  <h4 id="dTitle"></h4><p id="dMsg"></p>
+  <input class="inp mono" id="dInp">
+  <div class="acts"><button class="btn" id="dNo">Hủy</button><button class="btn pri" id="dYes">Xác nhận</button></div>
+</div></div>
+<div id="toast"></div>
+
+<script>
+"use strict";
+/* =====================================================================
+   CAN-Control Web — viết lại từ APK "CAN-Control V1.29" (mini-program CAN蓝牙)
+   BLE: service FFF0, ghi FFF2, notify FFF1. Gói tin = chuỗi hex, byte đầu là mã lệnh.
+   ===================================================================== */
+const $ = id => document.getElementById(id);
+const SVC = 0xfff0, CH_WRITE = 0xfff2, CH_NOTIFY = 0xfff1;
+
+/* ---------- mã hóa giống bản gốc ---------- */
+const tn = v => Math.floor(100 * v).toString(16).padStart(8, "0");   // số thực ×100, 4 byte
+const en = v => Math.floor(v).toString(16).padStart(4, "0");          // 2 byte
+const nn = v => Math.floor(v).toString(16).padStart(2, "0");          // 1 byte
+const Je = s => Array.from(new TextEncoder().encode(String(s)), b => b.toString(16).padStart(2, "0")).join("");
+function Xe(h) { // hex -> chuỗi (dừng ở byte 0)
+  const out = [];
+  for (let i = 0; i < h.length / 2; i++) { const b = parseInt(h.substr(2 * i, 2), 16); if (!b) break; out.push(b); }
+  return new TextDecoder().decode(new Uint8Array(out));
+}
+const on = (h, p) => 0.01 * parseInt(h.substring(p, p + 8), 16);
+const rn = (h, p) => parseInt(h.substring(p, p + 2), 16);
+const f32 = (dv, o) => o + 4 <= dv.byteLength ? dv.getFloat32(o, true) : 0;
+const u8 = (dv, o) => o < dv.byteLength ? dv.getUint8(o) : 0;
+const hms = s => { s = Math.max(0, Math.floor(s || 0)); return [s / 3600, s % 3600 / 60, s % 60].map(x => String(Math.floor(x)).padStart(2, "0")).join(":"); };
+const fx = (v, d = 2) => (Number(v) || 0).toFixed(d);
+
+/* ---------- trạng thái thiết bị (giữ tên biến như bản gốc) ---------- */
+const D = {
+  ver: 0, type: 0, id: "", act: "", cev: 0, scan: "",
+  PON: 0, KON: 1, UEN: 0, KRC: 0, WTi: 5, Sleep: 60, LEDK0: 0, LEDK1: 255, LEDK2: 50, UFS: 8, LFS: 50, AFS: 1, UHQ: 0, GIF: 1,
+  NTC: 0, CLV: 0, UEG: 0, MFS: 255, DST: 0, UI: 0, RDY: 5, SGK: 0, ETi: 1, KSi: 1, UCF: 0, TCH: 30, UIW: 0, ACK: 1, CCK: 1,
+  KS1: [0, 0], KS2: [0, 0], KS3: [0, 0], KS4: [0, 0],
+  SV2: 0, SA2: 0, SMW: 0, UMW: 0, TMW: 0, UMT: 0, OMT: 0, LSA: 0, HSA: 0, LSV: 0, HSV: 0,
+  OVT: 1, OAT: 1, OVD: 1, OAD: 1, USD: 0, SDU: 0, O2T: 1, O2D: 1, OVS: 0, OAS: 0, YCA: 0, YCV: 0, OST: 0, MMA: 0, MMV: 0, IVD: 1, IAD: 1,
+  SSID: "", UPWD: "", WID: "", WPD: "", VIN: "",
+  // live
+  h: -1, NFS: 0, OL: 1, H: 0, YS: 0, ce: 0, KT1: 0,
+  OV: 0, OA: 0, OW: 0, OT: 0, IV: 0, IA: 0, IW: 0, IT: 0, Ah: 0, Wh: 0, AH: 0, WH: 0, Ti: 0, TI: 0, NSD: 0, SOC: 0,
+};
+const SV = () => (D["KS" + D.KSi] || [0, 0])[0];
+const SA = () => (D["KS" + D.KSi] || [0, 0])[1];
+
+const TYPES = { 1: "Huawei", 2: "Increase (英可瑞)", 4: "ZTE 3000", 8: "Infypower (英飞源)", 12: "EV Station", 13: "ZEEHO", 14: "EV Charger (lấy điện trụ sạc)", 16: "EPS6020", 32: "ZTE 4875", 64: "Sinexcel", 65: "BH10M100", 66: "MC1503N5R" };
+
+/* ---------- bảng cảnh báo (port từ Re/Le/Ke/ke/ye/$e/He) ---------- */
+let alarmName = [], alarmOn = [], alarmPrev = "";
+function Re(name, st = 2) {
+  let found = 0;
+  for (let i = 0; i < 12; i++) if (alarmName[i] == name) { alarmOn[i] = st; found = 1; break; }
+  if (!found && st) for (let i = 1; i < 11; i++) if (i != 6 && !alarmOn[i]) { alarmName[i] = name; alarmOn[i] = st; break; }
+}
+function alarmReset(key, defaults) {
+  if (alarmPrev === key) return false;
+  alarmPrev = key; alarmName = defaults.slice(); alarmOn = Array(12).fill(0); return true;
+}
+function bits(b, map) { for (const [m, n] of map) if (b & m) Re(n); }
+function alHuawei(t, e, n, a, i, o) {
+  if (!alarmReset("hw" + [t, e, n, a, i, o], ["Bảo vệ module", "Quạt bất thường", "Vào thấp áp", "Vào quá áp", "Mất điện vào", "Quá nhiệt trong", "Lỗi module", "Ra quá dòng", "Ra thấp áp", "Ra quá áp", "Ngắn mạch ra", "Module tắt"])) return;
+  bits(t, [[128, "Chế độ thử"], [64, "Tải dao động"], [32, "Rơ-le đầu ra"], [16, "Mạch xả"], [8, "Mạch rơ-le"], [4, "Khóa ngắn mạch"], [2, "Địa chỉ phần cứng"], [1, "Mạch xả"]]);
+  bits(e, [[128, "Đổi địa chỉ"], [64, "Trùng địa chỉ"], [32, "Tắt chia dòng"], [16, "Lỗi giao tiếp"], [8, "Điện áp tụ"], [4, "Ra quá áp"], [2, "Chế độ ra"], [1, "Ổ cắm lỗi"]]);
+  bits(n, [[128, "Điện áp bus"], [64, "Cân bằng bus"], [32, "Mất điện vào"], [16, "Dòng không đổi"], [8, "Ngắn mạch ra"], [4, "Giao tiếp nội"], [2, "Tối ưu hiệu suất"], [1, "Chia dòng lỗi"]]);
+  bits(a, [[128, "Lỗi PFC"], [64, "Vào quá áp"], [32, "Trùng ID"], [16, "Lệch dòng nặng"], [8, "Mất pha AC"], [4, "Cân bằng 3 pha"], [2, "Vào thấp áp"], [1, "Khởi động tuần tự"]]);
+  bits(i, [[128, "Chất lượng truyền"], [64, "Chế độ tự động"], [32, "Xếp lại địa chỉ"], [16, "Quá nhiệt trong"], [2, "Module tắt"], [1, "Bảo vệ nhiệt thấp"]]);
+  bits(o, [[128, "Ra thấp áp"], [64, "Ra quá dòng"], [32, "Chip nhớ"], [16, "Hỏng quạt"], [8, "Bảo vệ module"], [4, "Lỗi module"], [2, "Bảo vệ quá nhiệt"], [1, "Khóa quá áp"]]);
+}
+function alZte4875(t, e, n, a, i, o, r) {
+  if (!alarmReset("zte" + [t, e, n, a, i, o, r], ["Bảo vệ quá nhiệt", "Quạt bất thường", "Vào thấp áp", "Vào quá áp", "Mất điện vào", "Quá nhiệt trong", "Dòng không đổi", "Ra quá dòng", "Ra thấp áp", "Ra quá áp", "Ra quá tải", "Module tắt"])) return;
+  bits(t, [[128, "Cầu chì ra"], [64, "Quá nhiệt trong"], [32, "Ra quá dòng"], [16, "Tắt do ra cao"], [8, "Tắt do vào thấp"], [4, "Tắt do vào cao"], [2, "Tắt do quá nhiệt"], [1, "Quạt bất thường"]]);
+  bits(e, [[128, "PFC quá dòng"], [64, "Sơ cấp quá dòng"], [32, "Giao tiếp nội"], [16, "EEPROM"], [8, "PFC thấp áp"], [4, "PFC quá áp"], [1, "Chia dòng lỗi"]]);
+  bits(n, [[32, "Ra quá tải"], [16, "Lỗi PFC"], [8, "Ra thấp áp"], [4, "Tần số vào"], [2, "Cầu chì vào"], [1, "Khởi động lỗi"]]);
+  bits(a, [[128, "BUS4 thấp áp"], [64, "BUS3 thấp áp"], [32, "BUS2 thấp áp"], [16, "BUS1 thấp áp"], [8, "Điện trở khởi động"], [4, "Quá nhiệt ngoài"], [2, "Lỗi tương thích"]]);
+  bits(i, [[128, "Mất điện vào"], [64, "Vào thấp áp"], [32, "Vào quá áp"], [16, "Cân bằng BUS"], [8, "BUS4 quá áp"], [4, "BUS3 quá áp"], [2, "BUS2 quá áp"], [1, "BUS1 quá áp"]]);
+  bits(o, [[64, "Module tắt"], [32, "Module ngủ"], [8, "Giới hạn CS vào"], [4, "Giảm CS do nhiệt"], [2, "Dòng không đổi"], [1, "Giới hạn CS ra"]]);
+  bits(r, [[128, "Chưa nối khởi động"], [32, "Ổ cắm quá nhiệt"], [16, "Đảo cực đầu vào"], [8, "Quá nhiệt trong máy"], [4, "Ra quá dòng"], [2, "Ra thấp áp"], [1, "Ra quá áp"]]);
+}
+function alEV(t, e, n, a, i, o, r, s) {
+  if (!alarmReset("ev" + [t, e, n, a, i, o, r, s], ["Dừng bình thường", "Nhiệt độ trụ", "Súng sạc lỗi", "Quá nhiệt trong", "Sạc bất thường", "Trụ dừng khẩn", "Lỗi khác", "Tự kiểm lỗi", "Sạc trước lỗi", "Dòng bất thường", "Áp bất thường", "Tham số lỗi"])) return;
+  if (t & 3) Re("Dừng bình thường"); else if (t >> 2 & 3) Re("Dừng thủ công"); else if (t >> 4 & 3) Re("Dừng do lỗi"); else if (t >> 6 & 3) Re("Xe yêu cầu dừng");
+  if (e & 3) Re("Nhiệt độ trụ"); else if (e >> 2 & 3) Re("Súng sạc lỗi"); else if (e >> 4 & 3) Re("Quá nhiệt trong"); else if (e >> 6 & 3) Re("Sạc bất thường");
+  if (n & 3) Re("Trụ dừng khẩn"); else if (n >> 2 & 3) Re("Lỗi khác"); else if (n >> 4 & 3) Re("Tự kiểm lỗi"); else if (n >> 6 & 3) Re("Sạc trước lỗi");
+  if (a & 3) Re("Dòng bất thường"); else if (a >> 2 & 3) Re("Áp bất thường"); else if (a >> 4 & 3) Re("Tham số lỗi");
+  if (i & 3) Re("BRM quá hạn"); if (o & 3) Re("BCP quá hạn"); if (o >> 2 & 3) Re("BRO quá hạn");
+  if (r & 3) Re("BCS quá hạn"); if (r >> 2 & 3) Re("BCL quá hạn"); if (r >> 4 & 3) Re("BST quá hạn");
+  if (s & 3) Re("BSD quá hạn"); if (s >> 2 & 3) Re("BSM quá hạn"); if (s >> 4 & 3) Re("Quá hạn khác");
+}
+function alIncrease(t, e) {
+  if (!alarmReset("inc" + [t, e, D.OV > 20], ["Vào quá áp", "Ra quá áp", "Áp không đổi", "Bảo vệ quá nhiệt", "Hỏng quạt", "Module tắt", "Vào thấp áp", "Ra thấp áp", "Dòng không đổi", "Bảo vệ quá dòng", "Lỗi module", "Tắt theo cài đặt"])) return;
+  bits(t, [[128, "Ra thấp áp"], [64, "Ra quá áp"], [32, "Vào thấp áp"], [16, "Vào quá áp"], [8, "Hỏng quạt"], [4, "Dòng không đổi"], [2, "Lỗi module"], [1, "Module tắt"]]);
+  if (t == 0 && D.OV > 20) Re("Áp không đổi");
+  bits(e, [[4, "Tắt theo cài đặt"], [2, "Bảo vệ quá nhiệt"], [1, "Bảo vệ quá dòng"]]);
+}
+function alInfy(t, e, n) {
+  if (!alarmReset("infy" + [t, e, n], ["Vào quá áp", "Ra quá áp", "Giới hạn công suất", "Bảo vệ quá nhiệt", "Hỏng quạt", "Module tắt", "Vào thấp áp", "Ra thấp áp", "Dòng không đổi", "Bảo vệ quá dòng", "Lỗi module", "Tắt theo cài đặt"])) return;
+  bits(t, [[32, "Xả lỗi"], [16, "Module ngủ"], [8, "Đầu vào lỗi"], [4, "Giao tiếp nội"], [1, "Ngắn mạch ra"]]);
+  bits(e, [[128, "Lỗi giao tiếp"], [64, "Khởi động mềm"], [32, "Ra quá áp"], [16, "Cảnh báo quá nhiệt"], [8, "Hỏng quạt"], [4, "Bảo vệ module"], [2, "Lỗi module"], [1, "Module tắt"]]);
+  bits(n, [[128, "PFC tắt"], [64, "Vào quá áp"], [32, "Vào thấp áp"], [16, "Cân bằng 3 pha"], [8, "Mất pha"], [4, "Chia dòng lỗi"], [2, "Trùng ID"], [1, "Dòng không đổi"]]);
+}
+
+/* ---------- chuỗi trạng thái (port từ MSG/FB) ---------- */
+function statusText() {
+  const h = D.h, C = D.OL, H = D.H;
+  if (h < 0) return ["Đang chờ dữ liệu…", 0];
+  if (D.ver >= 5.42 && !D.ACK) return ["Thiết bị chưa được cấp phép", 1];
+  if (D.ver >= 5.42 && !D.CCK) return ["Thiết bị đã bị khóa", 1];
+  if (h == 60) return ["Mô phỏng tăng áp pin bất thường", 1];
+  if (C == 0) {
+    if (H == 0) return ["Lỗi giao tiếp CAN", 1];
+    if (H == 39) return ["Kiểm tra cách điện không đạt", 1];
+    if (H < 6) return ["Bắt tay với trụ sạc thất bại", 1];
+    if (H < 9) return ["Thông tin xe không được chấp nhận", 1];
+    if (H == 16) return ["Kiểm tra điện áp không đạt", 1];
+    return ["Dừng bất thường khác", 1];
+  }
+  const m = {
+    50: ["Dừng sạc", 1], 51: ["Lỗi sạc", 1], 52: ["Đang cấu hình bắt tay", 0], 53: ["Đang cấu hình thông tin sạc", 0],
+    55: ["Đã sẵn sàng", 0], 56: ["Đang sạc", 0], 57: ["Sạc hoàn tất", 0], 58: ["Tắt do quá nhiệt (" + D.ce + "℃)", 1], 59: ["Đang kiểm tra cách điện", 0],
+  };
+  if (h == 54) return SV() >= D.LSV && SV() <= D.HSV ? ["Chờ xuất điện áp cài đặt", 0] : ["Điện áp cài đặt ngoài phạm vi", 1];
+  if (m[h]) return m[h];
+  if (D.OV == 0) return ["Đầu ra bộ sạc bất thường", 1];
+  return ({
+    4: ["Bộ sạc đã tắt", 1], 0: ["Chờ kết nối pin", 0], 1: ["Đang sạc", 0], 2: ["Đang sạc giai đoạn 2", 0], 5: ["Đang sạc trước (pre-charge)", 0],
+    40: ["Đang chờ hẹn giờ", 0], 3: ["Sạc hoàn tất", 0], 43: ["Sạc hoàn tất (đã tắt)", 0], 44: ["Tắt bảo vệ quá nhiệt", 1],
+  })[h] || ["Trạng thái " + h, 0];
+}
+
+/* =====================================================================
+   KẾT NỐI: Web Bluetooth hoặc thiết bị ảo
+   ===================================================================== */
+let link = null;           // {write(bytes), close()}
+let loginState = 0;        // 0 mới, 3 chờ, 1 sai mật khẩu, 2 đã đăng nhập
+let sendQ = Promise.resolve();
+
+function hexToBytes(h) { const b = new Uint8Array(h.length >> 1); for (let i = 0; i < b.length; i++) b[i] = parseInt(h.substr(2 * i, 2), 16); return b; }
+function send(hex) {
+  hex = String(hex).replace(/\s+/g, "").substring(0, 40);
+  if (!hex || !link) return;
+  log("tx", hex.toUpperCase());
+  sendQ = sendQ.then(() => link && link.write(hexToBytes(hex))).catch(e => log("sys", "Lỗi gửi: " + e.message));
+  return sendQ;
+}
+const sendAll = (...cmds) => cmds.flat().forEach(send);
+
+async function connectBLE() {
+  if (!navigator.bluetooth) return toast("Trình duyệt này không hỗ trợ Web Bluetooth");
+  let dev;
+  try {
+    dev = await navigator.bluetooth.requestDevice({
+      filters: [{ namePrefix: "CAN_" }, { namePrefix: "CEV_" }, { namePrefix: "ODM_" }, { namePrefix: "CAN-" }, { namePrefix: "@" }, { services: [SVC] }],
+      optionalServices: [SVC],
+    });
+  } catch (e) { if (e.name !== "NotFoundError") toast("Không chọn được thiết bị: " + e.message); return; }
+  const name = dev.name || "";
+  setPill("Đang kết nối " + name + "…");
+  try {
+    let server, tries = 0;
+    for (;;) { try { server = await dev.gatt.connect(); break; } catch (e) { if (++tries >= 5) throw e; await sleep(500); } }
+    const svc = await server.getPrimaryService(SVC);
+    const wr = await svc.getCharacteristic(CH_WRITE);
+    const nt = await svc.getCharacteristic(CH_NOTIFY);
+    nt.addEventListener("characteristicvaluechanged", ev => onPacket(ev.target.value.buffer.slice(ev.target.value.byteOffset, ev.target.value.byteOffset + ev.target.value.byteLength)));
+    await nt.startNotifications();
+    dev.addEventListener("gattserverdisconnected", () => { if (link) { link = null; disconnected("Mất kết nối Bluetooth — thường do thiết bị tắt, sóng yếu hoặc nhiễu mạnh."); } });
+    link = {
+      write: b => wr.properties.write ? wr.writeValueWithResponse(b) : wr.writeValueWithoutResponse(b),
+      close: () => dev.gatt.connected && dev.gatt.disconnect(),
+    };
+    startSession(name);
+  } catch (e) {
+    setPill("Chưa kết nối"); toast("Kết nối thất bại: " + e.message); log("sys", "Kết nối thất bại: " + e.message);
+  }
+}
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+function startSession(name) {
+  Object.assign(D, { ver: 0, type: 0, infoOK: 0, h: -1, ACK: 1, CCK: 1 });
+  alarmPrev = ""; alarmName = []; alarmOn = [];
+  D.cev = /^CEV_/.test(name) ? 1 : 0;
+  $("scrConnect").classList.add("hide"); $("scrDev").classList.remove("hide"); $("btnDisc").classList.remove("hide");
+  setPill(name, true);
+  log("sys", "Đã kết nối " + name);
+  if (/^@/.test(name)) { send(Je("CONNECT OK\n")); toast("Thiết bị dạng '@' dùng giao thức văn bản — xem tab Nhật ký"); switchTab("pLog"); }
+  // Đăng nhập giống bản gốc: thử mật khẩu mặc định + hỏi thông tin thiết bị
+  loginState = 3;
+  send("A0" + Je("0000")); send("EE");
+  for (const t of [1500, 2500]) setTimeout(() => {
+    if (!link) return;
+    if (loginState == 3) { loginState = 0; send("A0" + Je(getPwd())); }
+    if (!D.infoOK) send("EE");
+  }, t);
+  renderAll();
+}
+function disconnected(msg) {
+  stopDemo();
+  $("scrConnect").classList.remove("hide"); $("scrDev").classList.add("hide"); $("btnDisc").classList.add("hide");
+  setPill("Chưa kết nối");
+  if (msg) dialog({ title: "Mất kết nối", msg, input: false, noCancel: true });
+}
+function setPill(t, ok) { $("pillTxt").textContent = t; $("pill").classList.toggle("on", !!ok); }
+
+/* ---------- mật khẩu lưu theo Device ID ---------- */
+const store = {
+  get(k, d) { try { const v = localStorage.getItem("cc:" + k); return v == null ? d : v; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem("cc:" + k, v); } catch {} },
+};
+const getPwd = () => store.get("pwd:" + D.id, "0000");
+function askPassword(prefix) {
+  toast("Sai mật khẩu, vui lòng nhập lại!");
+  setTimeout(() => dialog({
+    title: "Nhập mật khẩu Bluetooth", msg: "Device ID: " + D.id + " · mặc định là 0000", value: "", yes: "Đăng nhập", no: "Chỉ xem",
+    ok: v => { store.set("pwd:" + D.id, v); loginState = 0; send(prefix + Je(v)); },
+  }), 800);
+}
+
+/* =====================================================================
+   PHÂN TÍCH GÓI NHẬN (port từ hàm MSG)
+   ===================================================================== */
+let renderPending = false;
+function onPacket(buf) {
+  const u = new Uint8Array(buf);
+  const e = Array.from(u, b => b.toString(16).padStart(2, "0")).join("").toUpperCase();
+  const dv = new DataView(buf);
+  if ($("logLive").checked || !/^(FB|FA|D0|D1)/.test(e)) log("rx", e);
+
+  if (e.startsWith("A101")) { /* xem trước LOGO */ }
+  else if (e.startsWith("A001")) { loginState = 2; log("sys", "Đăng nhập thành công"); if (D.ver <= 5.28) send("FF"); }
+  else if (e.startsWith("A000")) { if (loginState) return; loginState = 1; askPassword("A0"); }
+  else if (e.startsWith("F101") || e.startsWith("F201")) { /* truyền ảnh — không hỗ trợ */ }
+  else if (e.startsWith("FF")) parseFF(dv);
+  else if (e.startsWith("FE") || e.startsWith("EE")) parseInfo(e);
+  else if (e.startsWith("FA")) Object.assign(D, { OV: f32(dv, 1), OA: f32(dv, 5), OW: f32(dv, 9), IV: f32(dv, 13), IA: f32(dv, 17), IW: f32(dv, 21) });
+  else if (e.startsWith("FB")) parseFB(dv);
+  else if (e.startsWith("01")) Object.assign(D, { OV: on(e, 2), OA: on(e, 10), OW: on(e, 18), OT: on(e, 26), h: rn(e, 34), NFS: rn(e, 36), OL: rn(e, 38) });
+  else if (e.startsWith("02")) { Object.assign(D, { IV: on(e, 2), IA: on(e, 10), IW: on(e, 18), IT: on(e, 26) }); typeAlarms(rn(e, 34), rn(e, 36), rn(e, 38)); }
+  else if (e.startsWith("03")) Object.assign(D, { Ah: on(e, 2), Wh: on(e, 10), AH: on(e, 18), WH: on(e, 26) });
+  else if (e.startsWith("04")) Object.assign(D, { Ti: on(e, 2), TI: on(e, 10), NSD: on(e, 18), SOC: on(e, 26), YS: rn(e, 34) + (rn(e, 36) << 8), ce: rn(e, 38) });
+  else if (e.startsWith("10")) Object.assign(D, { KS1: [on(e, 2), on(e, 10)], KS2: [on(e, 18), on(e, 26)], KSi: rn(e, 34), PON: rn(e, 36), KON: rn(e, 38) });
+  else if (e.startsWith("11")) Object.assign(D, { KS3: [on(e, 2), on(e, 10)], KS4: [on(e, 18), on(e, 26)], UEN: rn(e, 36), KRC: rn(e, 38) });
+  else if (e.startsWith("12")) Object.assign(D, { SV2: on(e, 2), SA2: on(e, 10), SMW: on(e, 18), UMW: on(e, 26), WTi: rn(e, 34), ETi: rn(e, 36), Sleep: rn(e, 38) });
+  else if (e.startsWith("13")) Object.assign(D, { TMW: on(e, 2), UMT: on(e, 10), OMT: on(e, 18), LEDK0: rn(e, 34), LEDK1: rn(e, 36), LEDK2: rn(e, 38) });
+  else if (e.startsWith("14")) Object.assign(D, { LSA: on(e, 2), HSA: on(e, 10), LSV: on(e, 18), HSV: on(e, 26), UFS: rn(e, 34), LFS: rn(e, 36), AFS: 0.1 * rn(e, 38) });
+  else if (e.startsWith("15")) Object.assign(D, { OVT: .01 * on(e, 2), OAT: .01 * on(e, 10), OVD: .01 * on(e, 18), OAD: .01 * on(e, 26), UHQ: rn(e, 34), GIF: rn(e, 36) });
+  else if (e.startsWith("16")) Object.assign(D, { USD: on(e, 18), SDU: on(e, 26), NTC: rn(e, 34), CLV: .01 * rn(e, 38) });
+  else if (e.startsWith("17")) Object.assign(D, { O2T: .01 * on(e, 2), O2D: .01 * on(e, 10), OVS: on(e, 18), OAS: on(e, 26), UEG: rn(e, 34), MFS: rn(e, 38) });
+  else if (e.startsWith("18")) Object.assign(D, { YCA: on(e, 2), YCV: on(e, 10), OST: on(e, 18), TCH: on(e, 26), DST: rn(e, 36) });
+  else if (e.startsWith("19")) Object.assign(D, { MMA: on(e, 2), MMV: on(e, 10), UI: rn(e, 34), RDY: rn(e, 36), SGK: rn(e, 38) });
+  else if (e.startsWith("20")) D.SSID = Xe(e.substring(2, 40));
+  else if (e.startsWith("21")) D.UPWD = Xe(e.substring(2, 40));
+  else if (e.startsWith("22")) D.WID = Xe(e.substring(2, 40));
+  else if (e.startsWith("23")) D.WPD = Xe(e.substring(2, 40));
+  else if (e.startsWith("25")) D.VIN = Xe(e.substring(2, 40));
+  else if (e.startsWith("50")) alEV(rn(e, 2), rn(e, 4), rn(e, 6), rn(e, 8), 0, 0, 0, 0);
+  else if (e.startsWith("51")) alEV(0, 0, 0, 0, rn(e, 2), rn(e, 4), rn(e, 6), rn(e, 8));
+  else if (e.startsWith("40")) alHuawei(rn(e, 2), rn(e, 4), rn(e, 6), rn(e, 8), rn(e, 10), rn(e, 12));
+  if (!renderPending) { renderPending = true; requestAnimationFrame(() => { renderPending = false; renderAll(); }); }
+}
+
+function parseInfo(e) {
+  if (!D.infoOK) {
+    D.infoOK = 1;
+    D.act = Xe(e.substring(20, 40));
+    D.ver = .01 * parseInt(e.substring(16, 20), 16);
+    D.type = rn(e, 14);
+    D.id = "0x" + e.substring(2, 14);
+    D.cev = D.type == 12 ? 2 : D.type == 14 ? 1 : 0;
+    D.scan = TYPES[D.type] || "Không rõ (" + D.type + ")";
+    if (D.act.startsWith("Cxjdwx")) D.act = "Chưa kích hoạt";
+    log("sys", `Thiết bị ${D.id} · ${D.scan} · firmware ${fx(D.ver)}`);
+    const pwd = getPwd();
+    if (e.startsWith("EE")) { if (loginState == 0 || loginState == 3) send("A0" + Je(pwd)); }
+    else { send("FF" + Je(pwd)); setTimeout(() => { if (loginState == 3) { loginState = 0; send("FF" + Je(pwd)); } }, 1500); }
+  }
+  if (e.startsWith("FE")) {
+    Object.assign(D, { VIN: Xe(e.substring(100, 140)), SSID: Xe(e.substring(140, 180)), UPWD: Xe(e.substring(180, 220)), WID: Xe(e.substring(260, 300)) || "config", WPD: Xe(e.substring(300, 340)) || "88888888" });
+  }
+}
+
+function parseFF(t) {
+  if (u8(t, 1)) { if (loginState != 2) { loginState = 2; log("sys", "Đăng nhập thành công"); } }
+  else { askPassword("FF"); }
+  const b = o => u8(t, o);
+  Object.assign(D, {
+    PON: b(2), KON: b(3), UEN: b(5), KRC: b(6), WTi: b(7), Sleep: b(8), LEDK0: b(9), LEDK1: b(10), LEDK2: b(11),
+    UFS: b(12), LFS: b(13), AFS: b(14) / 10, UHQ: b(15), GIF: b(16), CKA2: b(17), NTC: b(18), DDT: b(19), CLV: .01 * b(20),
+    UEG: b(21), UCN: b(22), MFS: b(23), DOL: b(24), DST: b(25), LKS: b(26), UI: b(27), RDY: b(28), SGK: b(29), ETi: b(30),
+    KSi: b(31), UCF: b(32), TCH: b(33), UIW: b(34), ACK: b(35), CCK: b(36),
+  });
+  if (b(4)) D.type = b(4);
+  let o = 51;
+  const f = () => { const v = f32(t, o); o += 4; return v; };
+  D.KS1 = [f(), f()]; D.KS2 = [f(), f()]; D.KS3 = [f(), f()]; D.KS4 = [f(), f()];
+  for (const k of ["SV2", "SA2", "SMW", "UMW", "TMW", "UMT", "OMT", "MA", "LSA", "HSA", "LSV", "HSV", "OVT", "OAT", "OVD", "OAD",
+    "L2V", "H2V", "USD", "SDU", "O2T", "O2D", "OVS", "OAS", "YCA", "YCV", "OST", "MMA", "MMV", "IVD"]) D[k] = f();
+  if (D.ver >= 5.43) D.IAD = f32(t, o);
+}
+
+function parseFB(de) {
+  const b = o => u8(de, o);
+  Object.assign(D, { h: b(1), NFS: b(2), OL: b(3), SWT: b(7), SMT: b(8), H: b(9), YS: b(10) + (b(11) << 8), ce: b(12), KT1: b(13) });
+  let o = 31;
+  for (const k of ["OV", "OA", "OW", "OT", "IV", "IA", "IW", "IT", "Ah", "Wh", "AH", "WH", "Ti", "TI", "NSD", "SOC"]) { D[k] = f32(de, o); o += 4; }
+  if (D.ver >= 5.42) { D.UPS = b(14); D.UPV = f32(de, o); }
+  if (D.type == 2) alIncrease(b(4), b(5));
+  else if (D.type == 8) alInfy(b(4), b(5), b(6));
+  else if (D.ver >= 5.44 && D.type == 32) alZte4875(b(23), b(24), b(25), b(26), b(27), b(28), b(29));
+  else if (D.ver >= 5.44 && D.type == 1) alHuawei(b(23), b(24), b(25), b(26), b(27), b(28));
+  else if (D.ver >= 5.44 && D.type == 14) alEV(b(23), b(24), b(25), b(26), b(27), b(28), b(29), b(30));
+}
+function typeAlarms(t, e, n) { if (D.type == 2) alIncrease(t, e); if (D.type == 8) alInfy(t, e, n); }
+
+/* =====================================================================
+   GIAO DIỆN
+   ===================================================================== */
+const txt = (id, v) => { const el = $(id); if (el && el.textContent !== String(v)) el.textContent = v; };
+function renderAll() {
+  if ($("scrDev").classList.contains("hide")) return;
+  renderDash();
+  const cur = document.querySelector(".page:not(.hide)");
+  if (cur && cur.dataset.built) updateRows(cur);
+}
+
+function renderDash() {
+  const [st, bad] = statusText();
+  txt("stTxt", st); $("status").classList.toggle("bad", !!bad);
+  txt("stTm", D.YS ? "⏱ " + hms(D.YS) : D.NSD ? "⏻ " + hms(D.NSD) : "");
+  txt("vOW", fx(D.OW, 0)); txt("vOV", fx(D.OV)); txt("vOA", fx(D.OA)); txt("vSV", fx(SV())); txt("vSA", fx(SA()));
+  const maxW = D.UMW || D.SMW || D.TMW || 3000;
+  const pct = Math.max(0, Math.min(1, D.OW / maxW));
+  $("gArc").setAttribute("stroke-dasharray", (395.8 * pct).toFixed(1) + " 527.8");
+  txt("vPct", D.UMW ? "giới hạn " + fx(D.UMW, 0) + " W" : "");
+  const soc = Math.max(0, Math.min(100, Math.round(D.SOC)));
+  txt("vSOC", soc + "%"); $("socBar").style.width = soc + "%";
+  for (const k of ["IV", "IA", "IW", "IT", "OT", "Ah", "Wh", "AH", "WH"]) txt("v" + k, fx(D[k], k == "Wh" || k == "WH" || k == "IW" ? 0 : 2));
+  txt("vEEI", D.IW ? fx(D.OW / D.IW * 100) : "0.00"); txt("vEES", D.IW ? fx(D.IW - D.OW, 1) : "0.0");
+  txt("vTi", hms(D.Ti)); txt("vTI", hms(D.TI)); txt("vNFS", D.NFS + " / 255");
+  const pb = $("btnPower");
+  pb.className = "power " + (D.PON ? "on" : "off");
+  txt("pwrTxt", D.PON ? "ĐANG BẬT — BẤM ĐỂ TẮT" : "ĐANG TẮT — BẤM ĐỂ BẬT");
+  // cấu hình nhanh
+  const pr = $("presets");
+  const html = [1, 2, 3, 4].map(i => `<button class="preset ${D.KSi == i ? "act" : ""}" data-k="${i}">#${i}<br>${fx(D["KS" + i][0], 1)}V<br>${fx(D["KS" + i][1], 1)}A</button>`).join("");
+  if (pr.innerHTML !== html) pr.innerHTML = html;
+  // chip chức năng
+  const chips = [
+    ["Khởi động mềm", D.UHQ, D.UHQ ? D.UHQ + "s" : "Tắt", "soft"],
+    ["Sạc 2 giai đoạn", D.SGK || D.SA2, D.SA2 ? fx(D.SV2, 1) + "V/" + fx(D.SA2, 1) + "A" : "Tắt", "stage2"],
+    ["Hẹn giờ tắt", D.YS, D.YS ? hms(D.YS) : "Tắt", "timer"],
+    ["Đầy thì tắt", D.USD, D.USD ? "sau " + fx(D.USD, 0) + " phút" : "Tắt", "full"],
+    ["Giới hạn CS", D.UMW, D.UMW ? fx(D.UMW, 0) + "W" : "—", "pwr"],
+  ];
+  if (D.cev) chips.push(["Rơ-le đầu ra", D.KT1, D.KT1 ? "Mở" : "Đóng", "relay"]);
+  const ch = chips.map(c => `<button class="chip ${c[1] ? "on" : ""}" data-c="${c[3]}">${c[0]}: <b>${c[2]}</b></button>`).join("");
+  if ($("chips").innerHTML !== ch) $("chips").innerHTML = ch;
+  // cảnh báo
+  $("alarmCard").classList.toggle("hide", !alarmName.length);
+  const al = alarmName.map((n, i) => `<div class="al ${alarmOn[i] ? "on" : ""}">${n}</div>`).join("");
+  if ($("alarms").innerHTML !== al) $("alarms").innerHTML = al;
+}
+
+/* ---------- hành động trên bảng điều khiển ---------- */
+function setOutputVoltage() {
+  dialog({
+    title: "Đặt điện áp ra", msg: `Phạm vi: ${fx(D.LSV)} – ${fx(D.HSV)} V`, value: fx(SV()), num: true,
+    ok: v => {
+      v = parseFloat(v);
+      if (!isFinite(v) || v > D.HSV || (v < D.LSV && !D.UCF)) return toast("Vượt ngoài phạm vi cài đặt!");
+      sendAll("A80" + D.KSi + tn(v) + tn(SA()), "FF");
+    },
+  });
+}
+function setOutputCurrent() {
+  numDialog("Đặt dòng ra", D.LSA, D.HSA, SA(), v => sendAll("A80" + D.KSi + tn(SV()) + tn(v), "FF"), "A");
+}
+function choosePreset(i) {
+  if (D.KSi == i) return;
+  const [v, a0] = D["KS" + i]; const a = Math.min(a0, D.HSA || a0);
+  const go = vv => { D.KSi = i; sendAll("A80" + i + tn(vv) + tn(a), i <= 2 ? "FF10" : "FF11"); };
+  if (v > D.HSV || v < D.LSV) numDialog("Đặt điện áp ra", D.LSV, D.HSV, v, go, "V");
+  else confirmDlg("Chuyển cấu hình #" + i, `Để tránh bấm nhầm, xác nhận chuyển sang ${fx(v, 1)} V / ${fx(a, 1)} A?`, () => go(v));
+}
+function chipAction(c) {
+  if (c == "soft") {
+    if (D.cev) numDialog("Đếm ngược tắt khi quá nhiệt (giây)", 3, 60, D.UHQ, v => sendAll("F961" + nn(v), "FF15"));
+    else dialog({ title: "Khởi động mềm (dòng tăng dần)", msg: "Nhập thời gian 5–20 giây, hoặc 0 để tắt.", value: D.UHQ || 10, num: true, ok: v => { v = +v; if (v && (v < 5 || v > 20)) return toast("Vượt ngoài phạm vi cài đặt!"); sendAll("F961" + nn(v), "FF15"); } });
+  }
+  if (c == "stage2") switchTab("pSet", "g-stage2");
+  if (c == "timer") numDialog("Hẹn giờ sạc (phút, 0 = tắt)", 0, 600, Math.round(D.YS / 60), v => sendAll("A9" + en(v), "FF"));
+  if (c == "full") switchTab("pSet", "g-full");
+  if (c == "pwr") numDialog("Giới hạn công suất (W)", 300, D.SMW || 10000, D.UMW, v => sendAll("F84D" + tn(v), "FF"), "W");
+  if (c == "relay") confirmDlg("Rơ-le đầu ra", "Bình thường rơ-le tự mở khi đã sẵn sàng. KHÔNG mở thủ công trước khi sẵn sàng — điện áp cao có thể làm hỏng thiết bị/pin, thậm chí cháy nổ.", () => send("A4" + nn(1 - D.KT1)));
+}
+
+/* =====================================================================
+   BẢNG ĐỊNH NGHĨA CÀI ĐẶT (lệnh lấy từ bản gốc)
+   type: num | tog | seg | text | act
+   ===================================================================== */
+const val = k => () => D[k];
+const S = {
+  pSet: [
+    { g: "Điện áp & dòng điện", items: [
+      { t: "num", l: "Giới hạn công suất ra", d: "Công suất người dùng đặt không vượt quá giá trị này.", u: "W", v: val("UMW"), min: 300, max: () => D.SMW || 10000, c: v => ["F84D" + tn(v), "FF"] },
+      { t: "seg", l: "Chiến lược giới hạn công suất", d: "Một số trụ sạc xe điện ngắt khi quá công suất. Huawei/ZTE đọc được công suất vào nên có thể giới hạn theo đầu vào.", v: val("UIW"), opts: ["Theo đầu ra", "Theo đầu vào"], c: v => ["F9E1" + nn(v), "FF"] },
+      { t: "range", l: "Phạm vi điện áp cho phép", u: "V", lo: "LSV", hi: "HSV", c: (a, b) => ["F876" + tn(a), "F877" + tn(b), "FF"] },
+      { t: "range", l: "Phạm vi dòng cho phép", u: "A", lo: "LSA", hi: "HSA", c: (a, b) => ["F878" + tn(a), "F879" + tn(b), "FF"] },
+    ] },
+    { g: "Sạc 2 giai đoạn", id: "g-stage2", items: [
+      { t: "tog", l: "Bật sạc giai đoạn 2", d: "Giai đoạn 1 dòng lớn (~0–80%), giai đoạn 2 dòng nhỏ đến đầy. Sạc thấp hơn 100% một chút giúp pin bền hơn.", v: () => D.ver >= 5.39 ? D.SGK : (D.SA2 ? 1 : 0),
+        c: v => D.ver >= 5.39 ? ["A50" + v, "A40" + v, "FF19"] : ["F858" + (v ? tn(SV() - 3) : "00000000"), "F857" + (v ? tn(10) : "00000000"), "FF12"] },
+      { t: "num", l: "Điện áp chuyển giai đoạn 2", u: "V", v: val("SV2"), min: val("LSV"), max: val("HSV"), c: v => ["F858" + tn(v), "FF12"] },
+      { t: "num", l: "Dòng giai đoạn 2", u: "A", v: val("SA2"), min: val("LSA"), max: val("HSA"), c: v => ["F857" + tn(v), "FF12"] },
+    ] },
+    { g: "Tự tắt khi sạc đầy", id: "g-full", items: [
+      { t: "tog", l: "Tự tắt khi đầy", d: "Khi dòng giảm xuống dưới 'dòng tắt máy', bắt đầu đếm ngược rồi tắt.", v: () => D.USD ? 1 : 0, c: v => ["F859" + (v ? tn(1) : "00000000"), "FF16"] },
+      { t: "num", l: "Thời gian trễ trước khi tắt", u: "phút", v: val("USD"), min: 1, max: 600, c: v => ["F859" + tn(v), "FF16"] },
+      { t: "num", l: "Dòng tắt máy", u: "A", v: val("SDU"), min: 0, max: 10, c: v => ["F8F0" + tn(v), "FF"] },
+    ] },
+    { g: "Sạc trước (pre-charge)", items: [
+      { t: "num", l: "Điện áp sạc trước", d: "Dùng dòng nhỏ nạp đến mức điện áp này rồi mới sạc dòng lớn. Đặt 0 để tắt.", u: "V", v: val("YCV"), min: 0, max: val("HSV"), c: v => ["F8F6" + tn(v), "FF"] },
+      { t: "num", l: "Dòng sạc trước", u: "A", v: val("YCA"), min: val("LSA"), max: val("HSA"), c: v => ["F8F5" + tn(v), "FF"] },
+    ] },
+    { g: "Bảo vệ quá nhiệt", items: [
+      { t: "num", l: "Nhiệt độ bắt đầu giới hạn", d: "Đạt nhiệt độ này sẽ giới hạn công suất (mặc định 75℃ / 3000W).", u: "℃", v: val("UMT"), min: 40, max: 90, c: v => ["F84A" + tn(v), "FF13"] },
+      { t: "num", l: "Nhiệt độ thoát giới hạn", u: "℃", v: val("OMT"), min: 40, max: 90, c: v => ["F84B" + tn(v), "FF13"] },
+      { t: "num", l: "Công suất khi quá nhiệt", u: "W", v: val("TMW"), min: 500, max: 4000, c: v => ["F84C" + tn(v), "FF13"] },
+      { t: "num", l: "Nhiệt độ tắt máy bảo vệ", d: "Tắt sạc (quạt vẫn chạy), tự bật lại khi nguội dưới ngưỡng thoát.", u: "℃", v: val("OST"), min: 50, max: 120, c: v => ["F8F7" + tn(v), "FF18"] },
+    ] },
+    { g: "Quạt làm mát", items: [
+      { t: "num", l: "Tốc độ tối đa", d: "Tối đa 255. Một số nguồn ZTE >230 có thể làm màn hình khởi động lại.", v: val("MFS"), min: 200, max: 255, c: v => ["F9C5" + nn(v), "FF14"] },
+      { t: "num", l: "Tốc độ ban đầu", v: val("LFS"), min: 20, max: 200, c: v => ["F965" + nn(v), "FF14"] },
+      { t: "num", l: "Hệ số theo dòng", d: "Mỗi 1A dòng ra cộng thêm bấy nhiêu điểm tốc độ.", v: val("AFS"), dp: 1, min: .1, max: 3, c: v => ["F964" + nn(10 * v), "FF14"] },
+      { t: "num", l: "Hệ số theo nhiệt", d: "Mỗi 1℃ trên 30℃ cộng thêm bấy nhiêu điểm.", v: val("UFS"), min: 2, max: 20, c: v => ["F963" + nn(v), "FF14"] },
+      { t: "seg", l: "Nguồn đo nhiệt độ ra", d: "Nguồn: nhiệt độ hệ thống đọc qua CAN. Bo mạch: cảm biến NTC 10K gắn ngoài.", v: val("NTC"), opts: ["Bo mạch", "Nguồn"], c: v => ["F962" + nn(v), "FF16"] },
+    ] },
+    { g: "Lấy điện từ trụ sạc (CEV)", cev: 1, items: [
+      { t: "num", l: "Giới hạn điện áp tối đa", u: "V", v: val("MMV"), min: 100, max: 1000, c: v => ["F8FA" + tn(v), "FF19", "FF14"] },
+      { t: "num", l: "Giới hạn dòng tối đa", u: "A", v: val("MMA"), min: 10, max: 400, c: v => ["F8F9" + tn(v), "FF19", "FF14"] },
+      { t: "num", l: "Biên điện áp sẵn sàng", d: "Trụ sạc được coi là sẵn sàng khi điện áp ra lệch ≤ giá trị này (mặc định ±5V).", u: "V", v: val("RDY"), min: 1, max: 20, c: v => ["F9CD" + nn(v), "FF19"] },
+      { t: "seg", l: "Chiến lược điện áp trụ", d: "Mặc định gửi 'điện áp thấp nhất' của trụ. Chỉ chọn 'điện áp cài đặt' với trụ đặc biệt hỗ trợ.", v: val("UCF"), opts: ["Thấp nhất", "Đã cài đặt"], c: v => ["F9CF" + nn(v), "FF10"] },
+      { t: "text", l: "Mã VIN xe", d: "17 ký tự chuẩn.", v: val("VIN"), c: v => { v = v.toUpperCase(); if (!/^[A-HJ-NPR-Z0-9]{14}\d\d\d$/.test(v)) { toast("VIN không đúng!"); return null; } return ["FAD3" + Je(v), "FF25"]; } },
+    ] },
+  ],
+  pCal: [
+    { g: "Hiệu chỉnh điện áp ra", items: [
+      { t: "act", l: "Bắt đầu hiệu chỉnh", d: "Cần điện áp ra > 10V và dòng ra = 0A. Đo điện áp thực bằng đồng hồ rồi nhập vào.", b: "Bắt đầu", f: calVoltage },
+      { t: "num", l: "Hệ số hiển thị", u: "", v: val("OVT"), dp: 4, min: .1, max: 5, step: .0005, c: v => ["FB47" + tn(100 * v), "FF"] },
+      { t: "num", l: "Hệ số cài đặt", u: "", v: val("OVD"), dp: 4, min: .1, max: 5, step: .001, c: v => ["FB46" + tn(100 * v), "FF"] },
+      { t: "num", l: "Hệ số hiển thị 2", d: "Điểm hiệu chỉnh thứ 2 (dành cho ZTE 4875F1).", v: val("O2T"), dp: 4, min: .1, max: 5, step: .001, c: v => ["FBF2" + tn(100 * v), "FF"] },
+      { t: "num", l: "Hệ số cài đặt 2", v: val("O2D"), dp: 4, min: .1, max: 5, step: .001, c: v => ["FBF1" + tn(100 * v), "FF"] },
+      { t: "num", l: "Lọc dao động điện áp", d: "Ví dụ đặt 84V mà hiển thị nhảy 83.99–84.02 thì đặt 0.02.", u: "V", v: val("OVS"), min: 0, max: 1, c: v => ["F8F3" + tn(v), "FF"] },
+    ] },
+    { g: "Hiệu chỉnh dòng ra", items: [
+      { t: "num", l: "Hệ số hiển thị dòng", d: "Hệ số = dòng đặt ÷ dòng đo thực tế (ví dụ 30/30.4 = 0.9868). Phải hiệu chỉnh khi nguồn đang ở chế độ dòng không đổi.", v: val("OAT"), dp: 4, min: .1, max: 5, step: .001, c: v => ["FB45" + tn(100 * v), "FF"] },
+      { t: "num", l: "Hệ số cài đặt dòng", v: val("OAD"), dp: 4, min: .1, max: 5, step: .001, c: v => ["FB44" + tn(100 * v), "FF"] },
+      { t: "num", l: "Lọc dao động dòng", u: "A", v: val("OAS"), min: 0, max: 1, c: v => ["F8F4" + tn(v), "FF"] },
+      { t: "num", l: "Lọc dòng tối thiểu", d: "Một số nguồn (Increase) hiện 0.2–0.4A khi không tải; đặt lớn hơn mức đó để ẩn.", u: "A", v: val("CLV"), min: 0, max: 3, c: v => ["F848" + tn(v), "FF"] },
+    ] },
+    { g: "Hiệu chỉnh đầu vào", items: [
+      { t: "act", l: "Hiệu chỉnh điện áp vào", d: "Đo điện áp vào thực tế rồi nhập.", b: "Bắt đầu", f: () => { sendAll("F8FB" + tn(1), "FF"); numDialog("Nhập điện áp vào đo được", 10, 1000, D.IV, v => sendAll("F8FB" + tn(v / (D.IV || 1)), "FF"), "V"); } },
+      { t: "num", l: "Hệ số điện áp vào", v: val("IVD"), dp: 4, min: .1, max: 5, c: v => ["F8FB" + tn(v), "FF"] },
+      { t: "act", l: "Hiệu chỉnh dòng vào", b: "Bắt đầu", f: () => numDialog("Nhập dòng vào đo được", 3, 50, D.IA, v => sendAll("F8FC" + tn(v / (D.IA || 1)), "FF"), "A") },
+      { t: "num", l: "Hệ số dòng vào", v: val("IAD"), dp: 4, min: .1, max: 5, c: v => ["F8FC" + tn(v), "FF"] },
+    ] },
+  ],
+  pSys: [
+    { g: "Thông tin thiết bị", items: [
+      { t: "info", l: "Device ID", v: val("id") },
+      { t: "info", l: "Giao thức nguồn", v: val("scan") },
+      { t: "info", l: "Phiên bản firmware", v: () => fx(D.ver) },
+      { t: "info", l: "Ngày kích hoạt", v: val("act") },
+    ] },
+    { g: "Bluetooth & bảo mật", items: [
+      { t: "text", l: "Tên Bluetooth", d: "Tối đa 18 ký tự. Có hiệu lực sau khi khởi động lại.", v: () => D.SSID, c: v => ["FA73" + Je(v), "FF20"] },
+      { t: "text", l: "Mật khẩu Bluetooth", d: "Tối đa 18 ký tự.", v: () => D.UPWD, c: v => { store.set("pwd:" + D.id, v); return ["FA74" + Je(v), "FF21"]; } },
+      { t: "text", l: "Mật khẩu màn hình cảm ứng", d: "4–6 chữ số.", v: () => "", c: v => /^\d{4,6}$/.test(v) ? ["FAD1" + Je(v), "FF24"] : (toast("Nhập sai định dạng"), null) },
+      { t: "num", l: "Tự khóa màn hình cảm ứng sau", u: "giây", v: val("TCH"), min: 5, max: 255, c: v => ["F9C7" + nn(v), "FF18"] },
+    ] },
+    { g: "Màn hình & phím", items: [
+      { t: "num", l: "Độ sáng khi bật", v: val("LEDK1"), min: 10, max: 255, c: v => ["F969" + nn(v), "FF13"] },
+      { t: "num", l: "Độ sáng khi tắt máy", v: val("LEDK0"), min: 0, max: 255, c: v => ["F968" + nn(v), "FF13"] },
+      { t: "num", l: "Thời gian tắt màn hình", d: "0 = không tắt. Nhấn phím hoặc kết nối Bluetooth để sáng lại.", u: "giây", v: val("Sleep"), min: 0, max: 255, c: v => ["F96D" + nn(v), "FF12"] },
+      { t: "num", l: "Độ sáng khi tắt màn hình", v: val("LEDK2"), min: 0, max: 255, c: v => ["F96A" + nn(v), "FF13"] },
+      { t: "num", l: "Thời gian trang khởi động", u: "giây", v: val("WTi"), min: 3, max: 15, c: v => ["F96B" + nn(v), "FF12"] },
+      { t: "tog", l: "Hiện đếm ngược khi khởi động", v: val("ETi"), c: v => ["F96C" + nn(v), "FF12"] },
+      { t: "seg", l: "Hướng màn hình", d: "Có hiệu lực sau khi khởi động lại.", v: val("DST"), opts: ["0°", "90°", "180°", "270°"], c: v => ["AC0" + v, "FF18"] },
+      { t: "seg", l: "Kiểu giao diện màn hình", v: val("UI"), opts: ["Kiểu 1", "Kiểu 2"], c: v => ["F9C8" + nn(v), "FF19"] },
+      { t: "seg", l: "Ngôn ngữ màn hình thiết bị", v: val("UEN"), opts: ["中文", "English"], c: v => ["F970" + nn(v), "FF11"] },
+      { t: "tog", l: "Ảnh động khi sạc", v: val("GIF"), c: v => ["F96F" + nn(v), "FF15"] },
+      { t: "tog", l: "Bật phím trên mặt máy", d: "Mẹo: giữ đồng thời phím lên + xuống để bật/tắt; giữ phím giữa để chuyển nhanh 4 cấu hình.", v: val("KON"), c: v => ["F967" + nn(v), "FF10"] },
+      { t: "tog", l: "Đổi vị trí phím cộng/trừ", v: val("KRC"), c: v => ["F966" + nn(v), "FF11"] },
+    ] },
+    { g: "Giao thức module nguồn", items: [
+      { t: "proto", l: "Chọn hãng nguồn", d: "Đổi giao thức sẽ XÓA toàn bộ cài đặt và khởi động lại bo mạch." },
+    ] },
+    { g: "Cập nhật firmware qua WiFi", items: [
+      { t: "text", l: "Tên WiFi / hotspot", d: "Bo mạch tự tải firmware qua WiFi 2.4GHz có Internet.", v: () => D.WID || store.get("WID", "config"), c: v => { store.set("WID", v); return ["AB00" + Je(v), "FF22"]; } },
+      { t: "text", l: "Mật khẩu WiFi", v: () => D.WPD || store.get("WPD", "88888888"), c: v => { store.set("WPD", v); return ["AB01" + Je(v), "FF23"]; } },
+      { t: "act", l: "Nâng cấp firmware", d: "Mất điện/mất mạng giữa chừng không ảnh hưởng phiên bản hiện tại.", b: "Nâng cấp", f: () => upgrade("NewUI") },
+      { t: "act", l: "Quay về firmware ổn định", b: "Quay lại", f: () => upgrade(D.cev ? "CEVRollBack" : "CANRollBack") },
+    ] },
+    { g: "Bảo trì", items: [
+      { t: "act", l: "Xóa số liệu tích lũy", d: "Đặt về 0 Ah, Wh và thời gian chạy.", b: "Xóa", f: () => confirmDlg("Xóa số liệu?", "Ah, Wh và thời gian chạy tích lũy sẽ về 0.", () => { send("AA01"); toast("Đã xóa số liệu"); }) },
+      { t: "act", l: "Khởi động lại thiết bị", b: "Khởi động lại", f: () => confirmDlg("Khởi động lại?", "", () => { send("F001"); toast("Thiết bị đang khởi động lại"); setTimeout(disconnectNow, 600); }) },
+      { t: "act", l: "Sửa lỗi dữ liệu", d: "Kiểm tra và đặt lại một số cài đặt cá nhân (ví dụ màu màn hình) rồi khởi động lại. Dùng khi màn hình hiện số bất thường.", b: "Sửa lỗi", f: () => confirmDlg("Sửa lỗi dữ liệu?", "Một số cài đặt sẽ được đặt lại và thiết bị khởi động lại.", () => { send("F60001"); setTimeout(disconnectNow, 600); }) },
+      { t: "act", l: "Khôi phục cài đặt gốc", d: "Xóa tất cả hình ảnh và cài đặt.", b: "Khôi phục", dan: 1, f: () => confirmDlg("Khôi phục cài đặt gốc?", "Tất cả hình ảnh và cài đặt sẽ bị xóa.", () => { send("F60100"); toast("Đã gửi lệnh, thiết bị đang khởi động lại"); setTimeout(disconnectNow, 600); }) },
+    ] },
+  ],
+};
+const PROTOS = [[1, "Huawei", "R4815/R4830/R4850/R4875/R48100"], [2, "Increase", "TR72-3500, TR48-3000, EVR…"], [4, "ZTE 3000", "ZXD3000 V5.5–5.8"], [8, "Infypower", "REG50010S…"], [16, "EPS6020", "EPS4820/6020/7220"], [32, "ZTE 4875", "ZXEPS R4875F1"], [64, "Sinexcel", "SER10010K"], [65, "BH10M100", ""], [66, "MC1503N5R", ""]];
+
+function calVoltage() {
+  if (D.OV < 10 || D.OA > 0) return toast("Cần điện áp ra > 10V và dòng ra = 0A");
+  sendAll("C2", "FF");
+  numDialog("Nhập điện áp ra đo được", 10, 1000, D.OV, t => {
+    const e = Number(t / D.OV).toFixed(4);
+    sendAll("C4" + tn(100 * Number(t / SV()).toFixed(4)) + tn(100 * e), "FF");
+  }, "V");
+}
+function upgrade(name) {
+  confirmDlg("Bắt đầu nâng cấp?", "Thiết bị sẽ kết nối WiFi đã cài ở trên để tải firmware. Hãy theo dõi màn hình thiết bị.", () => {
+    sendAll("AB00" + Je(D.WID || store.get("WID", "config")), "AB01" + Je(D.WPD || store.get("WPD", "88888888")), "A700000000" + Je(name));
+    toast("Đã vào chế độ nâng cấp, theo dõi màn hình thiết bị");
+  });
+}
+
+function buildPage(pid) {
+  const el = $(pid);
+  if (pid == "pSet" || pid == "pSys") send("FF01"); // bản gốc gửi FF01 khi mở cài đặt
+  el.innerHTML = S[pid].filter(g => !g.cev || D.cev).map((g, gi) => `<div class="card sec" id="${g.id || ""}"><h3>${g.g}</h3>${g.items.map((it, ii) => rowHTML(pid, gi, ii, it)).join("")}</div>`).join("");
+  el.dataset.built = 1;
+  el.onclick = ev => {
+    const b = ev.target.closest("[data-a]"); if (!b) return;
+    const [gi, ii, extra] = b.dataset.a.split(",");
+    const groups = S[pid].filter(g => !g.cev || D.cev);
+    rowAction(groups[gi].items[ii], b, extra);
+  };
+  updateRows(el);
+}
+function rowHTML(pid, gi, ii, it) {
+  const a = `${gi},${ii}`;
+  let right = "";
+  if (it.t == "num" || it.t == "text" || it.t == "range") right = `<button class="val" data-a="${a}" data-v></button>`;
+  if (it.t == "num" && it.step) right = `<div class="stepper"><button class="btn sm" data-a="${a},-1">−</button>${right}<button class="btn sm" data-a="${a},1">＋</button></div>`;
+  if (it.t == "info") right = `<span class="val c" data-v></span>`;
+  if (it.t == "tog") right = `<button class="tog" data-a="${a}" data-tg></button>`;
+  if (it.t == "seg") right = `<div class="seg">${it.opts.map((o, i) => `<button data-a="${a},${i}" data-sg="${i}">${o}</button>`).join("")}</div>`;
+  if (it.t == "act") right = `<button class="btn sm ${it.dan ? "dan" : ""}" data-a="${a}">${it.b}</button>`;
+  if (it.t == "proto") right = "";
+  let body = `<div class="row" data-row="${a}"><div class="t"><div>${it.l}</div>${it.d ? `<small>${it.d}</small>` : ""}</div>${right}</div>`;
+  if (it.t == "proto") body += `<div class="presets" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr));margin-bottom:6px">${PROTOS.map(p => `<button class="preset" data-a="${a},${p[0]}" data-pt="${p[0]}"><b>${p[1]}</b><br><span class="mut" style="font-size:11px">${p[2] || "&nbsp;"}</span></button>`).join("")}</div>`;
+  return body;
+}
+function updateRows(el) {
+  const pid = el.id, groups = S[pid].filter(g => !g.cev || D.cev);
+  el.querySelectorAll("[data-row]").forEach(r => {
+    const [gi, ii] = r.dataset.row.split(","), it = groups[gi].items[ii];
+    const v = r.querySelector("[data-v]");
+    if (v) {
+      let s;
+      if (it.t == "range") s = `${fx(D[it.lo], 1)} – ${fx(D[it.hi], 1)} ${it.u}`;
+      else if (it.t == "num") s = fx(it.v(), it.dp ?? (Number.isInteger(+it.v()) ? 0 : 2)) + (it.u ? " " + it.u : "");
+      else if (it.t == "text") s = it.v() || "Đặt…";
+      else s = it.v() || "—";
+      if (v.textContent !== s) v.textContent = s;
+    }
+    const tg = r.querySelector("[data-tg]"); if (tg) tg.classList.toggle("on", !!+it.v());
+    r.querySelectorAll("[data-sg]").forEach(b => b.classList.toggle("act", +b.dataset.sg == +it.v()));
+  });
+  el.querySelectorAll("[data-pt]").forEach(b => b.classList.toggle("act", +b.dataset.pt == D.type));
+}
+function rowAction(it, btn, extra) {
+  const go = cmds => { if (cmds) sendAll(cmds); };
+  const res = x => typeof x == "function" ? x() : x;
+  if (it.t == "num") {
+    if (extra) return go(it.c(+it.v() + extra * it.step));
+    numDialog(it.l, res(it.min), res(it.max), it.v(), v => go(it.c(v)), it.u, it.dp);
+  }
+  if (it.t == "tog") go(it.c(+it.v() ? 0 : 1));
+  if (it.t == "seg") go(it.c(+extra));
+  if (it.t == "act") it.f();
+  if (it.t == "text") dialog({ title: it.l, msg: it.d || "", value: it.v(), ok: v => { v = v.trim(); if (!v) return toast("Không được để trống!"); go(it.c(v)); } });
+  if (it.t == "range") dialog({ title: it.l, msg: `Hiện tại: ${fx(D[it.lo])}-${fx(D[it.hi])} · nhập dạng thấp-cao`, value: `${fx(D[it.lo])}-${fx(D[it.hi])}`, ok: v => {
+    const m = v.trim().match(/^([\d.]+)\s*-\s*([\d.]+)$/); if (!m) return toast("Nhập sai định dạng!"); go(it.c(+m[1], +m[2]));
+  } });
+  if (it.t == "proto") {
+    const p = PROTOS.find(x => x[0] == +extra);
+    confirmDlg("Chuyển sang " + p[1] + "?", "Toàn bộ cài đặt sẽ bị xóa và thiết bị khởi động lại.", () => { send("FC53" + nn(p[0]) + "01"); toast("Đã gửi, thiết bị đang khởi động lại"); setTimeout(disconnectNow, 600); });
+  }
+}
+
+/* ---------- hộp thoại ---------- */
+let dlgCb = null;
+function dialog({ title, msg = "", value, input = true, num, yes = "Xác nhận", no = "Hủy", noCancel, ok }) {
+  $("dTitle").textContent = title; $("dMsg").textContent = msg;
+  const i = $("dInp"); i.classList.toggle("hide", !input); i.value = value ?? ""; i.inputMode = num ? "decimal" : "text";
+  $("dYes").textContent = noCancel ? "Đã hiểu" : yes; $("dNo").textContent = no; $("dNo").classList.toggle("hide", !!noCancel);
+  dlgCb = ok || null; $("mask").classList.add("show");
+  if (input) setTimeout(() => { i.focus(); i.select(); }, 60);
+}
+function closeDlg() { $("mask").classList.remove("show"); dlgCb = null; }
+$("dNo").onclick = closeDlg;
+$("dYes").onclick = () => { const cb = dlgCb, v = $("dInp").value; closeDlg(); cb && cb(v); };
+$("dInp").onkeydown = e => { if (e.key == "Enter") $("dYes").click(); };
+$("mask").onclick = e => { if (e.target.id == "mask") closeDlg(); };
+function numDialog(title, min, max, cur, ok, unit = "", dp) {
+  dialog({ title, msg: `Phạm vi: ${min} – ${max}${unit ? " " + unit : ""}`, value: cur != null ? fx(cur, dp ?? (Number.isInteger(+cur) ? 0 : 2)) : "", num: true, ok: v => {
+    v = parseFloat(String(v).replace(",", "."));
+    if (!isFinite(v) || v > Number(max) || v < Number(min)) return toast("Vượt ngoài phạm vi cài đặt!");
+    ok(v);
+  } });
+}
+const confirmDlg = (title, msg, ok) => dialog({ title, msg, input: false, ok });
+let toastT; function toast(m) { const t = $("toast"); t.textContent = m; t.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show"), 2200); }
+
+/* ---------- nhật ký ---------- */
+function log(cls, s) {
+  const el = $("log"), d = document.createElement("div");
+  d.className = cls; d.textContent = new Date().toLocaleTimeString("vi-VN") + (cls == "tx" ? "  → " : cls == "rx" ? "  ← " : "  • ") + s;
+  el.appendChild(d); while (el.childNodes.length > 400) el.firstChild.remove();
+  el.scrollTop = el.scrollHeight;
+}
+$("rawSend").onclick = () => { const v = $("rawInp").value.replace(/[^0-9a-f]/gi, ""); if (v.length % 2) return toast("Chuỗi hex phải có số ký tự chẵn"); send(v); $("rawInp").value = ""; };
+$("rawInp").onkeydown = e => { if (e.key == "Enter") $("rawSend").click(); };
+$("logClr").onclick = () => $("log").innerHTML = "";
+
+/* ---------- tab ---------- */
+function switchTab(id, anchor) {
+  document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("act", b.dataset.t == id));
+  document.querySelectorAll(".page").forEach(p => p.classList.toggle("hide", p.id != id));
+  if (S[id]) buildPage(id);
+  if (anchor) setTimeout(() => $(anchor)?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+  else window.scrollTo({ top: 0 });
+}
+$("tabs").onclick = e => { const b = e.target.closest("button"); if (b) switchTab(b.dataset.t); };
+
+/* ---------- nút ---------- */
+$("btnScan").onclick = connectBLE;
+$("btnDemo").onclick = () => startDemo(0);
+$("btnDemoCEV").onclick = () => startDemo(1);
+function disconnectNow() { const l = link; link = null; l && l.close(); disconnected(); }
+$("btnDisc").onclick = disconnectNow;
+$("btnPower").onclick = () => sendAll("A6" + nn(1 - D.PON), "FF10");
+$("tapV").onclick = setOutputVoltage;
+$("tapA").onclick = setOutputCurrent;
+$("presets").onclick = e => { const b = e.target.closest("[data-k]"); if (b) choosePreset(+b.dataset.k); };
+$("chips").onclick = e => { const b = e.target.closest("[data-c]"); if (b) chipAction(b.dataset.c); };
+
+if (!navigator.bluetooth) {
+  const w = $("bleWarn"); w.classList.remove("hide");
+  w.innerHTML = window.isSecureContext
+    ? "⚠️ Trình duyệt này chưa hỗ trợ Web Bluetooth. Hãy dùng <b>Chrome/Edge</b> trên Android hoặc máy tính (iPhone: dùng app <b>Bluefy</b>). Bạn vẫn có thể thử <b>thiết bị ảo</b>."
+    : "⚠️ Web Bluetooth chỉ chạy trên <b>https://</b> hoặc <b>localhost</b>. Hãy mở trang qua máy chủ (xem README). Bạn vẫn có thể thử <b>thiết bị ảo</b>.";
+}
+
+/* =====================================================================
+   THIẾT BỊ ẢO — mô phỏng bo mạch để dùng thử khi không có phần cứng
+   ===================================================================== */
+let demo = null;
+function startDemo(cev) {
+  const sim = {
+    type: cev ? 14 : 1, ver: 5.45, PON: 1, KSi: 1, KS: [[84, 15], [72.4, 15], [58.8, 10], [54.6, 20]],
+    LSV: 42, HSV: cev ? 750 : 58.5 * 1.5, LSA: 1, HSA: cev ? 100 : 50, SMW: 3000, UMW: 3000, TMW: 3000, UMT: 75, OMT: 70, OST: 95,
+    SV2: 0, SA2: 0, USD: 0, SDU: .5, YCV: 0, YCA: 2, MMV: 750, MMA: 100, OVT: 1, OAT: 1, OVD: 1, OAD: 1, O2T: 1, O2D: 1, OVS: 0, OAS: 0, IVD: 1, IAD: 1,
+    b: { 3: 1, 5: 0, 6: 0, 7: 5, 8: 60, 9: 10, 10: 200, 11: 50, 12: 8, 13: 50, 14: 10, 15: 0, 16: 1, 18: 0, 20: 0, 23: 255, 25: 0, 27: 0, 28: 5, 29: 0, 30: 1, 32: 0, 33: 30, 34: 0 },
+    bat: cev ? 66 : 70, Ah: 0, Wh: 0, AH: 1234.5, WH: 98765, Ti: 0, TI: 360000, YS: 0, relay: 1,
+  };
+  if (cev) { sim.KS = [[84, 30], [72, 30], [60, 20], [48, 20]]; sim.LSV = 42; sim.HSV = 120; }
+  const F8 = { "4A": "UMT", "4B": "OMT", "F7": "OST", "4C": "TMW", "FA": "MMV", "F9": "MMA", "76": "LSV", "77": "HSV", "78": "LSA", "79": "HSA", "F3": "OVS", "F4": "OAS", "4D": "UMW", "F6": "YCV", "F5": "YCA", "57": "SA2", "58": "SV2", "59": "USD", "F0": "SDU", "FB": "IVD", "FC": "IAD" };
+  const F9 = { "67": 3, "70": 5, "66": 6, "6B": 7, "6D": 8, "68": 9, "69": 10, "6A": 11, "63": 12, "65": 13, "64": 14, "61": 15, "6F": 16, "62": 18, "C5": 23, "C8": 27, "CD": 28, "6C": 30, "CF": 32, "C7": 33, "E1": 34 };
+  const FB = { "47": "OVT", "46": "OVD", "45": "OAT", "44": "OAD", "F2": "O2T", "F1": "O2D" };
+  const emit = bytes => setTimeout(() => demo && onPacket(bytes.buffer), 30 + Math.random() * 40);
+  const pktFF = () => {
+    const a = new Uint8Array(210), dv = new DataView(a.buffer);
+    a[0] = 0xFF; a[1] = 1; a[2] = sim.PON; a[4] = sim.type; a[31] = sim.KSi; a[35] = 1; a[36] = 1;
+    for (const k in sim.b) a[k] = sim.b[k];
+    a[29] = sim.SA2 ? 1 : 0;
+    let o = 51; const w = v => { dv.setFloat32(o, v, true); o += 4; };
+    sim.KS.forEach(([v, i]) => { w(v); w(i); });
+    for (const k of ["SV2", "SA2", "SMW", "UMW", "TMW", "UMT", "OMT", "", "LSA", "HSA", "LSV", "HSV", "OVT", "OAT", "OVD", "OAD", "", "", "USD", "SDU", "O2T", "O2D", "OVS", "OAS", "YCA", "YCV", "OST", "MMA", "MMV", "IVD"]) w(sim[k] || 0);
+    w(sim.IAD);
+    return a;
+  };
+  const tick = () => {
+    const [sv, sa] = sim.KS[sim.KSi - 1];
+    const live = sim.PON && sim.relay;
+    let target = 0, h = 4;
+    if (live) {
+      const lim = Math.min(sa, sim.UMW / Math.max(sim.bat, 1));
+      if (sim.bat < sv - 0.3) { target = lim; sim.bat += 0.02 * target / 10; h = 1; }
+      else { target = Math.max(0, lim * (sv - sim.bat) * 2); sim.bat = Math.min(sv, sim.bat + 0.002); h = target < sim.SDU ? 3 : 1; }
+      if (cev) h = 56;
+    }
+    sim.OA = live ? target * (0.98 + Math.random() * 0.04) : 0;
+    sim.OV = live ? sim.bat + sim.OA * 0.01 : sim.bat;
+    sim.OW = sim.OV * sim.OA;
+    sim.IW = sim.OW ? sim.OW / 0.955 + 15 : 8;
+    sim.IV = cev ? 380 + Math.random() * 3 : 228 + Math.random() * 3;
+    sim.IA = sim.IW / sim.IV;
+    sim.OT = 32 + sim.OW / 150 + Math.random(); sim.IT = sim.OT - 3;
+    if (live && sim.OA > .1) { sim.Ah += sim.OA / 3600; sim.Wh += sim.OW / 3600; sim.AH += sim.OA / 3600; sim.WH += sim.OW / 3600; sim.Ti++; }
+    sim.TI++; if (sim.YS > 0 && --sim.YS == 0) sim.PON = 0;
+    const lo = sv * 0.72, soc = (sim.OV - lo) / (sv - lo) * 100;
+    const a = new Uint8Array(100), dv = new DataView(a.buffer);
+    a[0] = 0xFB; a[1] = h; a[2] = Math.min(255, Math.round(sim.b[13] + sim.OA * sim.b[14] / 10 + Math.max(0, sim.OT - 30) * sim.b[12])); a[3] = 1;
+    a[10] = sim.YS & 255; a[11] = sim.YS >> 8; a[12] = Math.round(sim.OT); a[13] = sim.relay; a[14] = 0;
+    let o = 31; for (const v of [sim.OV, sim.OA, sim.OW, sim.OT, sim.IV, sim.IA, sim.IW, sim.IT, sim.Ah, sim.Wh, sim.AH, sim.WH, sim.Ti, sim.TI, 0, Math.max(0, Math.min(100, soc))]) { dv.setFloat32(o, v, true); o += 4; }
+    if (sim.type == 1) a[28] = sim.OT > sim.UMT ? 2 : 0; // bit "bảo vệ quá nhiệt" của Huawei
+    emit(a);
+  };
+  demo = {
+    write(bytes) {
+      const e = Array.from(bytes, b => b.toString(16).padStart(2, "0")).join("").toUpperCase();
+      const f = (p) => parseInt(e.substr(p, 8), 16) / 100;
+      if (e == "EE") { const id = "A47210A4AE30", v = Math.round(sim.ver * 100).toString(16).padStart(4, "0"); emit(hexToBytes("EE" + id + nn(sim.type) + v + Je("2025-6-1").padEnd(20, "0"))); }
+      else if (e.startsWith("A0")) emit(hexToBytes("A001")), setTimeout(() => emit(pktFF()), 120);
+      else if (e.startsWith("FF")) emit(pktFF());
+      else if (e.startsWith("A6")) sim.PON = parseInt(e.substr(2, 2), 16);
+      else if (e.startsWith("A80")) { const i = +e[3]; sim.KSi = i; sim.KS[i - 1] = [f(4), f(12)]; }
+      else if (e.startsWith("A9")) sim.YS = parseInt(e.substr(2, 4), 16) * 60;
+      else if (e.startsWith("A4")) sim.relay = parseInt(e.substr(2, 2), 16);
+      else if (e.startsWith("A5")) { const on = +e[3]; sim.SA2 = on ? 5 : 0; sim.SV2 = on ? sim.KS[sim.KSi - 1][0] - 3 : 0; }
+      else if (e.startsWith("AA01")) { sim.Ah = sim.Wh = sim.AH = sim.WH = sim.Ti = sim.TI = 0; }
+      else if (e.startsWith("AC0")) sim.b[25] = +e[3];
+      else if (e.startsWith("F8") && F8[e.substr(2, 2)]) sim[F8[e.substr(2, 2)]] = f(4);
+      else if (e.startsWith("F9") && F9[e.substr(2, 2)] != null) sim.b[F9[e.substr(2, 2)]] = parseInt(e.substr(4, 2), 16);
+      else if (e.startsWith("FB") && FB[e.substr(2, 2)]) sim[FB[e.substr(2, 2)]] = f(4) / 100;
+      else if (e.startsWith("FC53")) sim.type = parseInt(e.substr(4, 2), 16);
+      else if (e.startsWith("FA73")) toast("(Thiết bị ảo) Đã đổi tên Bluetooth");
+      return Promise.resolve();
+    },
+    timer: setInterval(tick, 1000),
+  };
+  link = { write: b => demo ? demo.write(b) : Promise.resolve(), close: stopDemo };
+  startSession(cev ? "CEV_Thiết bị ảo" : "CAN_Thiết bị ảo");
+}
+function stopDemo() { if (demo) { clearInterval(demo.timer); demo = null; } }
+</script>
+</body>
+</html>
