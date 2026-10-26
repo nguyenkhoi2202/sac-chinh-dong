@@ -162,6 +162,7 @@ details.faq p{color:var(--mut);font-size:14px;line-height:1.65;margin:8px 0 0}
       <p>Kết nối bo mạch CAN Bluetooth (tên bắt đầu bằng <b class="mono">CAN_</b>, <b class="mono">CEV_</b>, <b class="mono">ODM_</b>) để xem điện áp, dòng, công suất theo thời gian thực và chỉnh mọi thông số — không cần cài app.</p>
       <div class="acts">
         <button class="btn pri" id="btnScan">🔍 Tìm &amp; kết nối thiết bị</button>
+        <button class="btn" id="btnScanAll">📡 Hiện tất cả thiết bị BLE</button>
         <button class="btn" id="btnDemo">🧪 Thiết bị ảo (bộ sạc)</button>
         <button class="btn" id="btnDemoCEV">🚗 Thiết bị ảo (lấy điện trụ sạc)</button>
       </div>
@@ -284,7 +285,8 @@ details.faq p{color:var(--mut);font-size:14px;line-height:1.65;margin:8px 0 0}
    BLE: service FFF0, ghi FFF2, notify FFF1. Gói tin = chuỗi hex, byte đầu là mã lệnh.
    ===================================================================== */
 const $ = id => document.getElementById(id);
-const SVC = 0xfff0, CH_WRITE = 0xfff2, CH_NOTIFY = 0xfff1;
+// UUID đầy đủ — Bluefy (iOS) không nhận dạng rút gọn 0xfff0
+const SVC = "0000fff0-0000-1000-8000-00805f9b34fb", CH_WRITE = "0000fff2-0000-1000-8000-00805f9b34fb", CH_NOTIFY = "0000fff1-0000-1000-8000-00805f9b34fb";
 
 /* ---------- mã hóa giống bản gốc ---------- */
 const tn = v => Math.floor(100 * v).toString(16).padStart(8, "0");   // số thực ×100, 4 byte
@@ -420,11 +422,12 @@ function send(hex) {
 }
 const sendAll = (...cmds) => cmds.flat().forEach(send);
 
-async function connectBLE() {
+async function connectBLE(all) {
   if (!navigator.bluetooth) return toast("Trình duyệt này không hỗ trợ Web Bluetooth");
   let dev;
   try {
     try {
+      if (all === true) throw { name: "ShowAll", message: "người dùng chọn hiện tất cả" };
       dev = await navigator.bluetooth.requestDevice({
         filters: [{ namePrefix: "CAN_" }, { namePrefix: "CEV_" }, { namePrefix: "ODM_" }, { namePrefix: "CAN-" }, { namePrefix: "@" }, { services: [SVC] }],
         optionalServices: [SVC],
@@ -453,7 +456,12 @@ async function connectBLE() {
     await nt.startNotifications();
     dev.addEventListener("gattserverdisconnected", () => { if (link) { link = null; disconnected("Mất kết nối Bluetooth — thường do thiết bị tắt, sóng yếu hoặc nhiễu mạnh."); } });
     link = {
-      write: b => wr.properties.write ? wr.writeValueWithResponse(b) : wr.writeValueWithoutResponse(b),
+      write: b => {
+        const p = wr.properties || {};
+        if (p.write && wr.writeValueWithResponse) return wr.writeValueWithResponse(b);
+        if (!p.write && wr.writeValueWithoutResponse) return wr.writeValueWithoutResponse(b);
+        return wr.writeValue(b); // API cũ (Bluefy)
+      },
       close: () => dev.gatt.connected && dev.gatt.disconnect(),
     };
     startSession(name);
@@ -467,7 +475,7 @@ async function notFoundHelp() {
   let avail = true;
   try { if (navigator.bluetooth.getAvailability) avail = await navigator.bluetooth.getAvailability(); } catch {}
   dialog({
-    title: "Không tìm thấy thiết bị", input: false, noCancel: true,
+    title: "Không tìm thấy thiết bị", input: false, yes: "Hiện tất cả thiết bị", no: "Đóng", ok: () => connectBLE(true),
     msg: (avail ? "" : "⚠️ Trình duyệt báo Bluetooth đang TẮT hoặc không có quyền.\n\n") +
       "Hãy kiểm tra:\n" +
       "1. Bộ sạc đã cấp điện, bo Bluetooth đang chạy.\n" +
@@ -475,7 +483,7 @@ async function notFoundHelp() {
       "3. Android: bật Bluetooth VÀ Vị trí (GPS); cho Chrome quyền 'Thiết bị lân cận' và 'Vị trí'.\n" +
       "4. Máy tính: bật Bluetooth; macOS cấp quyền Bluetooth cho Chrome (Cài đặt hệ thống → Quyền riêng tư → Bluetooth).\n" +
       "5. Đứng gần bộ sạc, đợi 5–10 giây trong hộp chọn để danh sách hiện ra.\n" +
-      "6. Dùng Chrome/Edge (iPhone dùng Bluefy) và mở bằng link https://, không mở thẳng file.",
+      "6. Dùng Chrome/Edge (iPhone dùng Bluefy) và mở bằng link https://, không mở thẳng file.\n\nBấm 'Hiện tất cả thiết bị' để xem mọi thiết bị Bluetooth xung quanh (trên iPhone tên có thể khác, ví dụ không bắt đầu bằng CAN_).",
   });
 }
 const isCancel = e => (e && e.name) === "NotFoundError" || /cancel|hủy/i.test(errText(e));
@@ -941,7 +949,8 @@ function switchTab(id, anchor) {
 $("tabs").onclick = e => { const b = e.target.closest("button"); if (b) switchTab(b.dataset.t); };
 
 /* ---------- nút ---------- */
-$("btnScan").onclick = connectBLE;
+$("btnScan").onclick = () => connectBLE();
+$("btnScanAll").onclick = () => connectBLE(true);
 $("btnDemo").onclick = () => startDemo(0);
 $("btnDemoCEV").onclick = () => startDemo(1);
 function disconnectNow() { const l = link; link = null; l && l.close(); disconnected(); }
